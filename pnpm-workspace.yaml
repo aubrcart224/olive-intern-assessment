@@ -1,3 +1,6 @@
+onlyBuiltDependencies:
+  - supabase
+
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
