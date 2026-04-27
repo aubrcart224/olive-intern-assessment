@@ -13,6 +13,7 @@ type AnswerMap = Record<string, AnswerValue>;
 
 type QuizPlayerProps = {
   spec: QuizSpec;
+  quizId?: string;
 };
 
 /* ------------------------------------------------------------------ */
@@ -582,7 +583,7 @@ function QuestionRenderer({
 /*  Main QuizPlayer                                                    */
 /* ------------------------------------------------------------------ */
 
-export function QuizPlayer({ spec }: QuizPlayerProps) {
+export function QuizPlayer({ spec, quizId }: QuizPlayerProps) {
   const [answers, setAnswers] = useState<AnswerMap>(() =>
     buildInitialAnswers(spec),
   );
@@ -591,6 +592,7 @@ export function QuizPlayer({ spec }: QuizPlayerProps) {
   const [showResults, setShowResults] = useState(false);
   const [forcedResultId, setForcedResultId] = useState<string | null>(null);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const currentQuestionIndex = history[historyIndex] ?? 0;
   const currentQuestion = spec.quiz.questions[currentQuestionIndex];
@@ -641,6 +643,7 @@ export function QuizPlayer({ spec }: QuizPlayerProps) {
     setShowResults(false);
     setForcedResultId(null);
     setDirection("forward");
+    setSessionId(null);
   }, [spec]);
 
   /* Keyboard navigation */
@@ -701,6 +704,53 @@ export function QuizPlayer({ spec }: QuizPlayerProps) {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [currentQuestion, currentAnswer, goToNext, goToPrevious, showResults]);
+
+  /* Session tracking */
+  useEffect(() => {
+    if (!quizId || sessionId) return;
+
+    const startSession = async () => {
+      try {
+        const response = await fetch("/api/quiz/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quiz_id: quizId, action: "start" }),
+        });
+        const payload = await response.json();
+        if (payload.ok && payload.session?.id) {
+          setSessionId(payload.session.id);
+        }
+      } catch {
+        // Silently fail — analytics should never block the quiz
+      }
+    };
+
+    startSession();
+  }, [quizId, sessionId]);
+
+  useEffect(() => {
+    if (!showResults || !sessionId || !quizId) return;
+
+    const completeSession = async () => {
+      try {
+        await fetch("/api/quiz/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: sessionId,
+            action: "complete",
+            score: result.score,
+            band_id: result.band.id,
+            answers,
+          }),
+        });
+      } catch {
+        // Silently fail — analytics should never block the quiz
+      }
+    };
+
+    completeSession();
+  }, [showResults, sessionId, quizId, result.score, result.band.id, answers]);
 
   /* Fade animation key */
   const animKey = showResults

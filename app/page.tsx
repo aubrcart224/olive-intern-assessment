@@ -28,13 +28,25 @@ type GenerateQuizApiResponse =
       errorMessage: string;
     };
 
+type SaveQuizApiResponse =
+  | {
+      ok: true;
+      quiz: { id: string; share_token: string };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
 export default function Home() {
   const [sourceText, setSourceText] = useState("");
   const [submittedText, setSubmittedText] = useState("");
   const [editorText, setEditorText] = useState("");
   const [generatedSpec, setGeneratedSpec] = useState<QuizSpec | null>(null);
+  const [savedQuizId, setSavedQuizId] = useState<string | null>(null);
   const [issues, setIssues] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [, setIsSaving] = useState(false);
   const [generationState, setGenerationState] = useState<GenerationState>({
     message:
       "Describe the quiz you want in plain text. The backend will turn it into a structured JSON spec.",
@@ -42,8 +54,11 @@ export default function Home() {
   });
 
   const sharePath = useMemo(() => {
+    if (savedQuizId) {
+      return `/quiz?id=${savedQuizId}`;
+    }
     return generatedSpec ? buildQuizPath(generatedSpec) : "";
-  }, [generatedSpec]);
+  }, [generatedSpec, savedQuizId]);
 
   const shareUrl = useMemo(() => {
     if (!sharePath || typeof window === "undefined") {
@@ -106,6 +121,7 @@ export default function Home() {
       }
 
       setGeneratedSpec(payload.spec);
+      setSavedQuizId(null);
       setEditorText(JSON.stringify(payload.spec, null, 2));
       setIssues([]);
       setGenerationState({
@@ -114,6 +130,8 @@ export default function Home() {
           : "Quiz spec generated successfully.",
         tone: "success",
       });
+
+      await saveQuiz(payload.spec);
     } catch (error) {
       setGeneratedSpec(null);
       setGenerationState({
@@ -133,11 +151,48 @@ export default function Home() {
     await generateQuiz();
   };
 
-  const handleValidateEditor = () => {
+  const saveQuiz = async (spec: QuizSpec) => {
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/quiz/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ spec }),
+      });
+
+      const payload = (await response.json()) as SaveQuizApiResponse;
+
+      if (payload.ok) {
+        setSavedQuizId(payload.quiz.id);
+        setGenerationState((prev) => ({
+          ...prev,
+          message: `${prev.message} Saved to database.`,
+          tone: "success",
+        }));
+      } else {
+        setGenerationState((prev) => ({
+          ...prev,
+          message: `${prev.message} (Could not save to database: ${payload.error})`,
+          tone: "success",
+        }));
+      }
+    } catch {
+      setGenerationState((prev) => ({
+        ...prev,
+        message: `${prev.message} (Could not save to database.)`,
+        tone: "success",
+      }));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleValidateEditor = async () => {
     const result = parseQuizSpec(editorText);
 
     if (!result.success) {
       setGeneratedSpec(null);
+      setSavedQuizId(null);
       setIssues(result.issues);
       setGenerationState({
         message:
@@ -148,12 +203,15 @@ export default function Home() {
     }
 
     setGeneratedSpec(result.spec);
+    setSavedQuizId(null);
     setEditorText(JSON.stringify(result.spec, null, 2));
     setIssues([]);
     setGenerationState({
       message: "Manual JSON is valid and ready to use.",
       tone: "success",
     });
+
+    await saveQuiz(result.spec);
   };
 
   const handleCopyShareLink = async () => {
