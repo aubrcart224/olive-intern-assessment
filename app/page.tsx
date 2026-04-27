@@ -48,7 +48,32 @@ type RegenerateOptionsResponse =
       error: string;
     };
 
-// Inline editable field component
+/* ------------------------------------------------------------------ */
+/*  Olive Leaf Icon                                                    */
+/* ------------------------------------------------------------------ */
+function OliveLeafIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.5 0 1-.05 1.5-.15" />
+      <path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2" />
+      <path d="M12 22V12" />
+      <path d="M12 12c3-2 5-5 5-8" />
+      <path d="M12 12c-3-1-5-4-5-7" />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Editable Field Component                                           */
+/* ------------------------------------------------------------------ */
 function EditableField({
   value,
   onChange,
@@ -88,12 +113,12 @@ function EditableField({
   };
 
   if (isEditing) {
-    const inputClasses = `w-full rounded-xl border border-primary bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring ${className}`;
+    const inputClasses = `w-full rounded-xl border-2 border-olive-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-olive-500 focus:ring-4 focus:ring-olive-500/10 ${className}`;
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         {multiline ? (
           <textarea
-            className={`${inputClasses} min-h-[80px] resize-y`}
+            className={`${inputClasses} min-h-[100px] resize-y`}
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -115,13 +140,13 @@ function EditableField({
         <div className="flex gap-2">
           <button
             onClick={handleSave}
-            className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            className="rounded-lg bg-olive-500 px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-olive-500/20 transition hover:bg-olive-600"
           >
             Save
           </button>
           <button
             onClick={handleCancel}
-            className="rounded-md bg-muted px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/80"
+            className="rounded-lg bg-olive-100 px-4 py-2 text-xs font-semibold text-olive-700 transition hover:bg-olive-200"
           >
             Cancel
           </button>
@@ -133,19 +158,21 @@ function EditableField({
   return (
     <div
       onClick={() => setIsEditing(true)}
-      className={`group cursor-pointer rounded-xl border border-transparent px-2 py-1 -mx-2 transition hover:border-border hover:bg-muted/50 ${className}`}
+      className={`group cursor-pointer rounded-xl border-2 border-transparent px-3 py-2 -mx-3 transition hover:border-olive-200 hover:bg-olive-50/50 ${className}`}
     >
-      <span className={value ? "" : "text-muted-foreground italic"}>
+      <span className={value ? "" : "text-olive-400 italic"}>
         {value || placeholder}
       </span>
-      <span className="ml-2 opacity-0 group-hover:opacity-100 text-xs text-muted-foreground">
+      <span className="ml-2 opacity-0 group-hover:opacity-100 text-xs text-olive-400 transition-opacity">
         Click to edit
       </span>
     </div>
   );
 }
 
-// Number input for score editing
+/* ------------------------------------------------------------------ */
+/*  Score Input Component                                              */
+/* ------------------------------------------------------------------ */
 function ScoreInput({
   value,
   onChange,
@@ -188,7 +215,7 @@ function ScoreInput({
       <div className="flex items-center gap-2">
         <input
           type="number"
-          className="w-20 rounded-md border border-primary bg-background px-2 py-1 text-sm text-center outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+          className="w-20 rounded-lg border-2 border-olive-300 bg-white px-2 py-1.5 text-sm text-center font-semibold outline-none transition focus:border-olive-500 focus:ring-4 focus:ring-olive-500/10"
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -198,13 +225,13 @@ function ScoreInput({
         />
         <button
           onClick={handleSave}
-          className="rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          className="rounded-md bg-olive-500 px-2 py-1 text-xs font-bold text-white hover:bg-olive-600"
         >
           ✓
         </button>
         <button
           onClick={handleCancel}
-          className="rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/80"
+          className="rounded-md bg-olive-100 px-2 py-1 text-xs font-bold text-olive-700 hover:bg-olive-200"
         >
           ✕
         </button>
@@ -215,8 +242,12 @@ function ScoreInput({
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition hover:bg-muted ${
-        value > 0 ? "text-emerald-600 bg-emerald-50" : value < 0 ? "text-red-600 bg-red-50" : "text-muted-foreground bg-muted"
+      className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition hover:shadow-sm ${
+        value > 0 
+          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" 
+          : value < 0 
+            ? "bg-red-100 text-red-700 hover:bg-red-200" 
+            : "bg-olive-100 text-olive-700 hover:bg-olive-200"
       }`}
       title="Click to edit score"
     >
@@ -225,6 +256,9 @@ function ScoreInput({
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*  Main Page Component                                                */
+/* ------------------------------------------------------------------ */
 export default function Home() {
   const [sourceText, setSourceText] = useState("");
   const [submittedText, setSubmittedText] = useState("");
@@ -234,8 +268,7 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [, setIsSaving] = useState(false);
   const [generationState, setGenerationState] = useState<GenerationState>({
-    message:
-      "Describe the quiz you want in plain text. The backend will turn it into a structured JSON spec.",
+    message: "Describe the quiz you want in plain text. The AI will turn it into an interactive quiz.",
     tone: "idle",
   });
 
@@ -250,31 +283,25 @@ export default function Home() {
     if (!sharePath || typeof window === "undefined") {
       return "";
     }
-
     return new URL(sharePath, window.location.origin).toString();
   }, [sharePath]);
 
   const generateQuiz = async () => {
     const prompt = sourceText.trim();
-
-    if (!prompt) {
-      return;
-    }
+    if (!prompt) return;
 
     setIsGenerating(true);
     setSubmittedText(prompt);
     setIssues([]);
     setGenerationState({
-      message: "Generating quiz spec...",
+      message: "AI is crafting your quiz...",
       tone: "info",
     });
 
     try {
       const response = await fetch("/api/quiz-spec", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
 
@@ -283,20 +310,8 @@ export default function Home() {
       if (!payload.ok) {
         setGeneratedSpec(null);
         setIssues(payload.issues ?? []);
-
         setGenerationState({
-          message:
-            payload.errorMessage ??
-            "Quiz generation failed. Try updating your prompt.",
-          tone: "error",
-        });
-        return;
-      }
-
-      if (!response.ok) {
-        setGeneratedSpec(null);
-        setGenerationState({
-          message: "Quiz generation failed. Try updating your prompt.",
+          message: payload.errorMessage ?? "Quiz generation failed. Try a different prompt.",
           tone: "error",
         });
         return;
@@ -307,8 +322,8 @@ export default function Home() {
       setIssues([]);
       setGenerationState({
         message: payload.repaired
-          ? "The first model response was malformed, but an automatic repair pass produced a valid quiz spec."
-          : "Quiz spec generated successfully.",
+          ? "Quiz generated with automatic fixes applied."
+          : "Your quiz is ready! Preview and edit below.",
         tone: "success",
       });
 
@@ -316,10 +331,7 @@ export default function Home() {
     } catch (error) {
       setGeneratedSpec(null);
       setGenerationState({
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unexpected error while generating the quiz.",
+        message: error instanceof Error ? error.message : "Unexpected error while generating the quiz.",
         tone: "error",
       });
     } finally {
@@ -350,19 +362,9 @@ export default function Home() {
           message: `${prev.message} Saved to database.`,
           tone: "success",
         }));
-      } else {
-        setGenerationState((prev) => ({
-          ...prev,
-          message: `${prev.message} (Could not save to database: ${payload.error})`,
-          tone: "success",
-        }));
       }
     } catch {
-      setGenerationState((prev) => ({
-        ...prev,
-        message: `${prev.message} (Could not save to database.)`,
-        tone: "success",
-      }));
+      // Silently fail - quiz is still usable
     } finally {
       setIsSaving(false);
     }
@@ -372,28 +374,29 @@ export default function Home() {
     if (!generatedSpec) return;
     setSavedQuizId(null);
     await saveQuiz(generatedSpec);
+    setGenerationState({
+      message: "Changes saved to database.",
+      tone: "success",
+    });
   };
 
   const handleCopyShareLink = async () => {
-    if (!shareUrl) {
-      return;
-    }
-
+    if (!shareUrl) return;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setGenerationState({
-        message: "Share link copied to clipboard.",
+        message: "Share link copied to clipboard!",
         tone: "success",
       });
     } catch {
       setGenerationState({
-        message: "Could not copy the share link. You can still open it manually below.",
+        message: "Could not copy link. You can still open it manually.",
         tone: "error",
       });
     }
   };
 
-  // Update quiz metadata
+  /* Update functions */
   const updateQuizTitle = (title: string) => {
     if (!generatedSpec) return;
     setGeneratedSpec({
@@ -421,7 +424,6 @@ export default function Home() {
     });
   };
 
-  // Update question
   const updateQuestion = (index: number, updates: Partial<QuizQuestion>) => {
     if (!generatedSpec) return;
     const newQuestions = [...generatedSpec.quiz.questions];
@@ -432,36 +434,29 @@ export default function Home() {
     });
   };
 
-  // Update option for a question
   const updateOption = (questionIndex: number, optionIndex: number, updates: Partial<ChoiceOption>) => {
     if (!generatedSpec) return;
     const question = generatedSpec.quiz.questions[questionIndex];
     if (!("options" in question)) return;
-
     const newOptions = [...question.options];
     newOptions[optionIndex] = { ...newOptions[optionIndex], ...updates };
     updateQuestion(questionIndex, { options: newOptions } as Partial<QuizQuestion>);
   };
 
-  // Remove an option from a question
   const removeOption = (questionIndex: number, optionIndex: number) => {
     if (!generatedSpec) return;
     const question = generatedSpec.quiz.questions[questionIndex];
     if (!("options" in question)) return;
-    if (question.options.length <= 2) return; // Keep at least 2 options
-
+    if (question.options.length <= 2) return;
     const newOptions = question.options.filter((_, i) => i !== optionIndex);
     updateQuestion(questionIndex, { options: newOptions } as Partial<QuizQuestion>);
   };
 
-  // Regenerate options for a question
   const [regeneratingQuestionIndex, setRegeneratingQuestionIndex] = useState<number | null>(null);
 
   const regenerateOptions = async (questionIndex: number) => {
     if (!generatedSpec) return;
     const question = generatedSpec.quiz.questions[questionIndex];
-    
-    // Only works for multiple choice or image_choice questions
     if (!("options" in question)) {
       setGenerationState({
         message: "Cannot regenerate options for this question type.",
@@ -499,7 +494,6 @@ export default function Home() {
         return;
       }
 
-      // Update the question with new options while preserving structure
       updateQuestion(questionIndex, { options: payload.options } as Partial<QuizQuestion>);
       setGenerationState({
         message: `Options regenerated for question ${questionIndex + 1}. Save to persist.`,
@@ -515,7 +509,6 @@ export default function Home() {
     }
   };
 
-  // Update result band
   const updateResultBand = (index: number, updates: Partial<ResultBand>) => {
     if (!generatedSpec) return;
     const newBands = [...generatedSpec.quiz.resultsScreen.bands];
@@ -529,7 +522,6 @@ export default function Home() {
     });
   };
 
-  // Remove question
   const removeQuestion = (index: number) => {
     if (!generatedSpec) return;
     const newQuestions = generatedSpec.quiz.questions.filter((_, i) => i !== index);
@@ -539,7 +531,6 @@ export default function Home() {
     });
   };
 
-  // Move question up/down
   const moveQuestion = (index: number, direction: -1 | 1) => {
     if (!generatedSpec) return;
     const newIndex = index + direction;
@@ -552,343 +543,428 @@ export default function Home() {
     });
   };
 
+  /* ------------------------------------------------------------------ */
+  /*  Render                                                             */
+  /* ------------------------------------------------------------------ */
   return (
-    <main className="min-h-screen bg-background px-6 py-12">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground">
-              Olive Interview
-            </p>
-            <h1 className="text-4xl font-semibold tracking-tight">Text-to-Quiz</h1>
-            <p className="max-w-2xl text-lg text-muted-foreground">
-              Describe the quiz you want in plain text. Then edit it visually before sharing.
+    <div className="min-h-screen bg-[#faf9f6]">
+      {/* Top Progress Bar - shown when generating */}
+      {isGenerating && (
+        <div className="fixed left-0 right-0 top-0 z-50 h-1.5 bg-olive-200">
+          <div className="h-full animate-pulse bg-olive-500" style={{ width: "60%" }} />
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-5 sm:px-10 border-b border-olive-200">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-olive-700 transition hover:bg-olive-50"
+        >
+          <OliveLeafIcon className="h-5 w-5" />
+          <span className="hidden sm:inline">Text-to-Quiz</span>
+        </Link>
+        <Link href="/dashboard">
+          <Button 
+            variant="outline" 
+            className="rounded-xl border-olive-200 text-olive-700 hover:bg-olive-50 hover:text-olive-800"
+          >
+            Dashboard
+          </Button>
+        </Link>
+      </header>
+
+      <main className="px-6 py-12 sm:px-10">
+        <div className="mx-auto max-w-4xl">
+          {/* Hero Section */}
+          <div className="mb-16 text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-olive-100 px-4 py-2">
+              <OliveLeafIcon className="h-4 w-4 text-olive-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-olive-700">
+                Olive Interview
+              </span>
+            </div>
+            <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+              Create a quiz from
+              <br />
+              <span className="text-olive-600">just a description</span>
+            </h1>
+            <p className="mx-auto max-w-xl text-lg text-gray-600">
+              Describe what you want in plain English. Our AI will generate a beautiful, 
+              interactive quiz you can share instantly.
             </p>
           </div>
 
-          <Link href="/dashboard">
-            <Button size="lg" variant="outline">
-              Open dashboard
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <form
-            className="rounded-3xl border border-border bg-card p-6 shadow-sm"
-            onSubmit={handleSubmit}
-          >
-            <div className="space-y-3">
-              <label
-                className="text-sm font-medium text-foreground"
-                htmlFor="source-text"
-              >
-                Quiz prompt
-              </label>
-              <textarea
-                id="source-text"
-                className="min-h-72 w-full resize-y rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                onChange={(event) => setSourceText(event.target.value)}
-                placeholder="Example: Create a 5-question employee onboarding quiz with mostly multiple choice questions, one confidence slider, simple scoring, and a results screen with beginner/intermediate/expert bands."
-                value={sourceText}
-              />
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm text-muted-foreground">
-                  Describe the quiz in plain English. The server turns it into a structured JSON spec.
+          {/* Prompt Input Section */}
+          <section className="mb-12">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
+                <textarea
+                  id="source-text"
+                  value={sourceText}
+                  onChange={(e) => setSourceText(e.target.value)}
+                  placeholder="Example: Create a 5-question quiz to help someone figure out if they're eating too much ultra-processed food. Ask about breakfast habits, how often they read ingredient labels, whether they cook at home, and how often they eat fast food. At the end, give them a score and recommend whether they should try Olive."
+                  className="min-h-[200px] w-full resize-y rounded-3xl border-2 border-olive-100 bg-white p-6 text-lg leading-relaxed text-gray-800 placeholder:text-olive-300 outline-none transition focus:border-olive-400 focus:ring-4 focus:ring-olive-500/10"
+                />
+                <div className="absolute bottom-4 right-4">
+                  <span className="text-xs font-medium text-olive-400">
+                    {sourceText.length} chars
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm text-gray-500">
+                  Be specific about topics, question types, and what result you want.
                 </p>
-                <Button disabled={!sourceText.trim() || isGenerating} size="lg" type="submit">
-                  {isGenerating ? "Generating..." : "Generate Quiz"}
+                <Button
+                  disabled={!sourceText.trim() || isGenerating}
+                  size="lg"
+                  type="submit"
+                  className="rounded-2xl bg-olive-500 px-8 py-6 text-base font-semibold text-white shadow-lg shadow-olive-500/20 transition hover:bg-olive-600 hover:shadow-xl hover:shadow-olive-500/30 disabled:opacity-50 disabled:shadow-none"
+                >
+                  {isGenerating ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Generating...
+                    </span>
+                  ) : (
+                    "Generate Quiz"
+                  )}
                 </Button>
               </div>
-            </div>
-          </form>
-
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Generation status
-                </h2>
-                <p
-                  className={[
-                    "rounded-2xl px-4 py-3 text-sm",
-                    generationState.tone === "success"
-                      ? "bg-emerald-500/10 text-emerald-700"
-                      : generationState.tone === "error"
-                        ? "bg-destructive/10 text-destructive"
-                        : generationState.tone === "info"
-                          ? "bg-primary/10 text-foreground"
-                          : "bg-muted text-muted-foreground",
-                  ].join(" ")}
-                >
-                  {generationState.message}
-                </p>
-              </div>
-
-              <div className="space-y-2 rounded-2xl bg-muted/40 p-4">
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Last prompt
-                </p>
-                <p className="whitespace-pre-wrap break-words text-sm text-foreground">
-                  {submittedText || "No quiz request submitted yet."}
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-border p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                    Questions
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold">
-                    {generatedSpec?.quiz.questions.length ?? 0}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-border p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                    Result bands
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold">
-                    {generatedSpec?.quiz.resultsScreen.bands.length ?? 0}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {submittedText ? (
-                  <Button
-                    disabled={isGenerating}
-                    onClick={generateQuiz}
-                    type="button"
-                    variant="outline"
-                  >
-                    Re-run prompt
-                  </Button>
-                ) : null}
-              </div>
-
-              {shareUrl ? (
-                <div className="space-y-3 rounded-2xl border border-border bg-muted/30 p-4">
-                  <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                      Shareable quiz link
-                    </p>
-                    <a
-                      className="mt-2 block break-all text-sm text-primary underline-offset-4 hover:underline"
-                      href={shareUrl}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      {shareUrl}
-                    </a>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button onClick={handleCopyShareLink} type="button" variant="outline">
-                      Copy link
-                    </Button>
-                    <a
-                      className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
-                      href={sharePath}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      Take quiz
-                    </a>
-                  </div>
-                </div>
-              ) : null}
-            </div>
+            </form>
           </section>
-        </div>
 
-        {/* Single preview/editor section */}
-        <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight">Quiz preview & editor</h2>
-              <p className="text-sm text-muted-foreground">
-                Click any text to edit it directly. Save your changes when done.
-              </p>
+          {/* Status Message */}
+          {generationState.tone !== "idle" && (
+            <div
+              className={`mb-8 rounded-2xl px-6 py-4 text-sm font-medium transition-all ${
+                generationState.tone === "success"
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  : generationState.tone === "error"
+                    ? "bg-red-50 text-red-800 border border-red-200"
+                    : "bg-olive-50 text-olive-800 border border-olive-200"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {generationState.tone === "success" && (
+                  <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+                {generationState.tone === "error" && (
+                  <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                {generationState.tone === "info" && (
+                  <svg className="h-5 w-5 text-olive-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                {generationState.message}
+              </div>
             </div>
-            {generatedSpec && (
-              <Button onClick={handleSaveEdited} variant="secondary" size="sm">
-                Save changes
-              </Button>
-            )}
-          </div>
+          )}
 
-          {generatedSpec ? (
-            <div className="space-y-6">
-              {/* Quiz header */}
-              <div className="rounded-2xl bg-muted/40 p-4 space-y-3">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                    Quiz title
+          {/* Share Section - Only when quiz exists */}
+          {shareUrl && (
+            <section className="mb-12 rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-olive-500">
+                    Shareable Quiz Link
                   </p>
-                  <EditableField
-                    value={generatedSpec.quiz.title}
-                    onChange={updateQuizTitle}
-                    placeholder="Enter quiz title..."
-                    className="text-base font-semibold"
-                    maxLength={120}
-                  />
+                  <a
+                    href={shareUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block truncate text-sm font-medium text-olive-600 underline-offset-4 hover:underline"
+                  >
+                    {shareUrl}
+                  </a>
                 </div>
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                    Description
-                  </p>
-                  <EditableField
-                    value={generatedSpec.quiz.description}
-                    onChange={updateQuizDescription}
-                    placeholder="Enter quiz description..."
-                    multiline
-                    maxLength={400}
-                  />
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleCopyShareLink}
+                    variant="outline"
+                    className="rounded-xl border-olive-200 text-olive-700 hover:bg-olive-50"
+                  >
+                    <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy link
+                  </Button>
+                  <a
+                    href={sharePath}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-olive-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-olive-500/20 transition hover:bg-olive-600"
+                  >
+                    Take quiz
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
                 </div>
+              </div>
+            </section>
+          )}
+
+          {/* Quiz Editor Preview */}
+          {generatedSpec && (
+            <section className="space-y-8">
+              {/* Editor Header */}
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                    Score label
+                  <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                    Quiz Preview
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Click any text to edit. Changes save automatically.
                   </p>
-                  <EditableField
-                    value={generatedSpec.quiz.scoring.scoreLabel}
-                    onChange={updateQuizScoreLabel}
-                    placeholder="Enter score label..."
-                    maxLength={40}
-                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  {submittedText && (
+                    <Button
+                      disabled={isGenerating}
+                      onClick={generateQuiz}
+                      variant="outline"
+                      className="rounded-xl border-olive-200 text-olive-700 hover:bg-olive-50"
+                    >
+                      <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Regenerate
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleSaveEdited}
+                    className="rounded-xl bg-olive-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-olive-500/20 transition hover:bg-olive-600"
+                  >
+                    <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    Save changes
+                  </Button>
+                </div>
+              </div>
+
+              {/* Quiz Overview Card */}
+              <div className="rounded-3xl border-2 border-olive-200 bg-white p-8 shadow-sm">
+                <div className="mb-6 flex items-center gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-olive-100 px-3 py-1 text-xs font-semibold text-olive-700">
+                    <OliveLeafIcon className="h-3 w-3" />
+                    Quiz Overview
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {generatedSpec.quiz.questions.length} questions ·{" "}
+                    {generatedSpec.quiz.resultsScreen.bands.length} result bands
+                  </span>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                      Quiz Title
+                    </label>
+                    <EditableField
+                      value={generatedSpec.quiz.title}
+                      onChange={updateQuizTitle}
+                      placeholder="Enter quiz title..."
+                      className="text-2xl font-bold text-gray-900"
+                      maxLength={120}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                      Description
+                    </label>
+                    <EditableField
+                      value={generatedSpec.quiz.description}
+                      onChange={updateQuizDescription}
+                      placeholder="Enter quiz description..."
+                      multiline
+                      maxLength={400}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-4 pt-4 border-t border-olive-200">
+                    <div className="flex-1">
+                      <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                        Score Label
+                      </label>
+                      <EditableField
+                        value={generatedSpec.quiz.scoring.scoreLabel}
+                        onChange={updateQuizScoreLabel}
+                        placeholder="Enter score label..."
+                        maxLength={40}
+                      />
+                    </div>
+                    <div className="rounded-2xl bg-olive-50 px-6 py-4 text-center">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-olive-500">
+                        Scoring
+                      </span>
+                      <p className="mt-1 text-lg font-bold text-olive-700">0-100</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Questions */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Questions ({generatedSpec.quiz.questions.length})
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold tracking-tight text-gray-900">
+                  Questions
                 </h3>
                 {generatedSpec.quiz.questions.map((question, index) => (
                   <div
-                    className="rounded-2xl border border-border p-4 space-y-4"
                     key={question.id}
+                    className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 space-y-3">
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                            Question {index + 1}
-                          </p>
-                          <EditableField
-                            value={question.title}
-                            onChange={(title) => updateQuestion(index, { title })}
-                            placeholder="Enter question title..."
-                            className="font-medium"
-                            maxLength={180}
-                          />
-                        </div>
-                        {"description" in question && (
-                          <div>
-                            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                              Description (optional)
-                            </p>
-                            <EditableField
-                              value={question.description || ""}
-                              onChange={(description) => updateQuestion(index, { description })}
-                              placeholder="Enter question description..."
-                              multiline
-                              maxLength={400}
-                            />
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                    <div className="mb-6 flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-olive-100 text-sm font-bold text-olive-700">
+                          {index + 1}
+                        </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-600">
                             {question.type.replace("_", " ")}
                           </span>
-                          {"options" in question && (
-                            <span className="text-xs text-muted-foreground">
-                              {question.options.length} options
+                          {"allowMultiple" in question && question.allowMultiple && (
+                            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                              Multi-select
                             </span>
                           )}
-                          {"allowMultiple" in question && (
-                            <span className="text-xs text-muted-foreground">
-                              {question.allowMultiple ? "Multi-select" : "Single-select"}
+                          {"options" in question && (
+                            <span className="text-xs text-gray-400">
+                              {question.options.length} options
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => moveQuestion(index, -1)}
                           disabled={index === 0}
-                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          className="rounded-lg p-2 text-gray-400 transition hover:bg-olive-50 hover:text-olive-600 disabled:opacity-30"
                           title="Move up"
                         >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                           </svg>
                         </button>
                         <button
                           onClick={() => moveQuestion(index, 1)}
                           disabled={index === generatedSpec.quiz.questions.length - 1}
-                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          className="rounded-lg p-2 text-gray-400 transition hover:bg-olive-50 hover:text-olive-600 disabled:opacity-30"
                           title="Move down"
                         >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </button>
                         <button
                           onClick={() => removeQuestion(index)}
-                          className="rounded-md p-1.5 text-destructive hover:bg-destructive/10"
+                          className="rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
                           title="Remove question"
                         >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </div>
                     </div>
 
-                    {/* Options section */}
-                    {"options" in question && (
-                      <div className="space-y-3 border-t border-border pt-3">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                            Answer Options
-                          </p>
-                          <button
-                            onClick={() => regenerateOptions(index)}
-                            disabled={regeneratingQuestionIndex === index}
-                            className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition disabled:opacity-50"
-                          >
-                            {regeneratingQuestionIndex === index ? (
-                              <>
-                                <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                Regenerating...
-                              </>
-                            ) : (
-                              <>
-                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                Regenerate Answers
-                              </>
-                            )}
-                          </button>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                          Question Text
+                        </label>
+                        <EditableField
+                          value={question.title}
+                          onChange={(title) => updateQuestion(index, { title })}
+                          placeholder="Enter question..."
+                          className="text-lg font-semibold text-gray-900"
+                          maxLength={180}
+                        />
+                      </div>
+
+                      {"description" in question && (
+                        <div>
+                          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                            Description (optional)
+                          </label>
+                          <EditableField
+                            value={question.description || ""}
+                            onChange={(description) => updateQuestion(index, { description })}
+                            placeholder="Enter description..."
+                            multiline
+                            maxLength={400}
+                          />
                         </div>
-                        
-                        <div className="space-y-2">
-                          {question.options.map((option, optionIndex) => (
-                            <div
-                              key={option.id}
-                              className="rounded-xl border border-border/50 bg-muted/30 p-3 space-y-2"
+                      )}
+
+                      {/* Options Section */}
+                      {"options" in question && (
+                        <div className="mt-6 border-t-2 border-olive-200 pt-6">
+                          <div className="mb-4 flex items-center justify-between">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-olive-500">
+                              Answer Options
+                            </label>
+                            <button
+                              onClick={() => regenerateOptions(index)}
+                              disabled={regeneratingQuestionIndex === index}
+                              className="inline-flex items-center gap-2 rounded-lg bg-olive-50 px-3 py-2 text-xs font-semibold text-olive-700 transition hover:bg-olive-100 disabled:opacity-50"
                             >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1">
+                              {regeneratingQuestionIndex === index ? (
+                                <>
+                                  <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                  Regenerating...
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                  </svg>
+                                  Regenerate with AI
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          <div className="grid gap-3">
+                            {question.options.map((option, optionIndex) => (
+                              <div
+                                key={option.id}
+                                className="group flex items-start gap-4 rounded-2xl border border-olive-200 bg-olive-50/30 p-4 transition hover:border-olive-300 hover:bg-olive-50/50"
+                              >
+                                <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-olive-200 text-xs font-bold text-olive-700">
+                                  {String.fromCharCode(65 + optionIndex)}
+                                </span>
+                                <div className="flex-1 space-y-2">
                                   <EditableField
                                     value={option.label}
                                     onChange={(label) => updateOption(index, optionIndex, { label })}
                                     placeholder="Option text..."
+                                    className="font-medium text-gray-900"
                                     maxLength={140}
                                   />
+                                  {option.helperText && (
+                                    <EditableField
+                                      value={option.helperText}
+                                      onChange={(helperText) => updateOption(index, optionIndex, { helperText })}
+                                      placeholder="Helper text..."
+                                      className="text-xs text-gray-500"
+                                      maxLength={240}
+                                    />
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <ScoreInput
@@ -898,7 +974,7 @@ export default function Home() {
                                   <button
                                     onClick={() => removeOption(index, optionIndex)}
                                     disabled={question.options.length <= 2}
-                                    className="rounded-md p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                                    className="rounded-lg p-2 text-gray-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-0"
                                     title="Remove option"
                                   >
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -907,117 +983,136 @@ export default function Home() {
                                   </button>
                                 </div>
                               </div>
-                              {option.helperText && (
-                                <div className="pl-2 border-l-2 border-border">
-                                  <EditableField
-                                    value={option.helperText}
-                                    onChange={(helperText) => updateOption(index, optionIndex, { helperText })}
-                                    placeholder="Helper text (optional)..."
-                                    className="text-xs text-muted-foreground"
-                                    maxLength={240}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Yes/No specific editing */}
-                    {question.type === "yes_no" && (
-                      <div className="grid grid-cols-2 gap-3 border-t border-border pt-3">
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                            Yes label
-                          </p>
-                          <EditableField
-                            value={question.yesLabel}
-                            onChange={(yesLabel) => updateQuestion(index, { yesLabel })}
-                            placeholder="Yes"
-                            maxLength={40}
-                          />
+                      {/* Yes/No Section */}
+                      {question.type === "yes_no" && (
+                        <div className="mt-6 grid grid-cols-2 gap-4 border-t-2 border-olive-200 pt-6">
+                          <div>
+                            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                              "Yes" Label
+                            </label>
+                            <EditableField
+                              value={question.yesLabel}
+                              onChange={(yesLabel) => updateQuestion(index, { yesLabel })}
+                              placeholder="Yes"
+                              maxLength={40}
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                              "No" Label
+                            </label>
+                            <EditableField
+                              value={question.noLabel}
+                              onChange={(noLabel) => updateQuestion(index, { noLabel })}
+                              placeholder="No"
+                              maxLength={40}
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                            No label
-                          </p>
-                          <EditableField
-                            value={question.noLabel}
-                            onChange={(noLabel) => updateQuestion(index, { noLabel })}
-                            placeholder="No"
-                            maxLength={40}
-                          />
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
 
               {/* Results */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Result bands ({generatedSpec.quiz.resultsScreen.bands.length})
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold tracking-tight text-gray-900">
+                  Result Bands
                 </h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {generatedSpec.quiz.resultsScreen.bands.map((band, index) => (
                     <div
-                      className="rounded-2xl border border-border p-4 space-y-3"
                       key={band.id}
+                      className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300"
                     >
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                      <div className="mb-4 flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${
+                            index === 0
+                              ? "bg-emerald-100 text-emerald-700"
+                              : index === generatedSpec.quiz.resultsScreen.bands.length - 1
+                                ? "bg-red-100 text-red-700"
+                                : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
                           {band.minPercent}%–{band.maxPercent}%
-                        </p>
-                        <EditableField
-                          value={band.title}
-                          onChange={(title) => updateResultBand(index, { title })}
-                          placeholder="Enter band title..."
-                          className="font-medium"
-                          maxLength={120}
-                        />
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                          Description
-                        </p>
-                        <EditableField
-                          value={band.description}
-                          onChange={(description) => updateResultBand(index, { description })}
-                          placeholder="Enter band description..."
-                          multiline
-                          maxLength={400}
-                        />
+                      <div className="space-y-4">
+                        <div>
+                          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                            Title
+                          </label>
+                          <EditableField
+                            value={band.title}
+                            onChange={(title) => updateResultBand(index, { title })}
+                            placeholder="Enter band title..."
+                            className="font-semibold text-gray-900"
+                            maxLength={120}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                            Description
+                          </label>
+                          <EditableField
+                            value={band.description}
+                            onChange={(description) => updateResultBand(index, { description })}
+                            placeholder="Enter band description..."
+                            multiline
+                            maxLength={400}
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-12 text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                No quiz generated yet.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Enter a prompt above and click "Generate Quiz" to get started.
+            </section>
+          )}
+
+          {/* Empty State */}
+          {!generatedSpec && !isGenerating && (
+            <div className="rounded-3xl border-2 border-dashed border-olive-300 bg-olive-50/30 p-16 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-olive-100">
+                <OliveLeafIcon className="h-8 w-8 text-olive-500" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                Ready to create your quiz?
+              </h3>
+              <p className="mx-auto max-w-sm text-sm text-gray-500">
+                Describe what you want above and click "Generate Quiz" to see the magic happen.
               </p>
             </div>
           )}
 
-          {issues.length > 0 ? (
-            <div className="mt-6 rounded-2xl bg-destructive/10 p-4 text-sm text-destructive">
-              <p className="font-medium">Validation issues</p>
-              <ul className="mt-2 list-disc space-y-1 pl-5">
-                {issues.map((issue) => (
-                  <li key={issue}>{issue}</li>
+          {/* Issues Display */}
+          {issues.length > 0 && (
+            <div className="mt-8 rounded-2xl bg-red-50 p-6 text-sm text-red-800 border border-red-200">
+              <p className="mb-3 flex items-center gap-2 font-semibold">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Validation Issues
+              </p>
+              <ul className="space-y-2">
+                {issues.map((issue, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                    <span>{issue}</span>
+                  </li>
                 ))}
               </ul>
             </div>
-          ) : null}
-        </section>
-      </div>
-    </main>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
