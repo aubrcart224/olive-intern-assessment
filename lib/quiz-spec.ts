@@ -95,7 +95,7 @@ const branchingSchema = z
     }
   });
 
-const choiceOptionSchema = z.object({
+export const choiceOptionSchema = z.object({
   id: idSchema,
   label: z.string().min(1).max(140),
   helperText: z.string().max(240).optional(),
@@ -213,7 +213,7 @@ export const quizQuestionSchema = z.discriminatedUnion("type", [
   imageChoiceQuestionSchema,
 ]);
 
-const resultBandSchema = z
+export const resultBandSchema = z
   .object({
     id: idSchema,
     title: z.string().min(1).max(120),
@@ -378,6 +378,8 @@ export const generateQuizRequestSchema = z.object({
 export type QuizQuestion = z.infer<typeof quizQuestionSchema>;
 export type QuizSpec = z.infer<typeof quizSpecSchema>;
 export type GenerateQuizRequest = z.infer<typeof generateQuizRequestSchema>;
+export type ResultBand = z.infer<typeof resultBandSchema>;
+export type ChoiceOption = z.infer<typeof choiceOptionSchema>;
 
 export function formatZodIssues(issues: z.ZodIssue[]) {
   return issues.map((issue) => {

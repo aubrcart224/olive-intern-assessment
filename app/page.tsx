@@ -5,7 +5,7 @@ import { FormEvent, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { buildQuizPath } from "@/lib/quiz-share";
-import { parseQuizSpec, type QuizSpec } from "@/lib/quiz-spec";
+import { type QuizSpec, type QuizQuestion, type ResultBand, type ChoiceOption } from "@/lib/quiz-spec";
 
 type GenerationState = {
   message: string;
@@ -38,10 +38,196 @@ type SaveQuizApiResponse =
       error: string;
     };
 
+type RegenerateOptionsResponse =
+  | {
+      ok: true;
+      options: ChoiceOption[];
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+// Inline editable field component
+function EditableField({
+  value,
+  onChange,
+  placeholder,
+  className,
+  multiline = false,
+  maxLength,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+  multiline?: boolean;
+  maxLength?: number;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+
+  const handleSave = () => {
+    onChange(editValue.trim());
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(value);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !multiline) {
+      e.preventDefault();
+      handleSave();
+    }
+    if (e.key === "Escape") {
+      handleCancel();
+    }
+  };
+
+  if (isEditing) {
+    const inputClasses = `w-full rounded-xl border border-primary bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring ${className}`;
+    return (
+      <div className="space-y-2">
+        {multiline ? (
+          <textarea
+            className={`${inputClasses} min-h-[80px] resize-y`}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            autoFocus
+          />
+        ) : (
+          <input
+            className={inputClasses}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            autoFocus
+          />
+        )}
+        <div className="flex gap-2">
+          <button
+            onClick={handleSave}
+            className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Save
+          </button>
+          <button
+            onClick={handleCancel}
+            className="rounded-md bg-muted px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/80"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={() => setIsEditing(true)}
+      className={`group cursor-pointer rounded-xl border border-transparent px-2 py-1 -mx-2 transition hover:border-border hover:bg-muted/50 ${className}`}
+    >
+      <span className={value ? "" : "text-muted-foreground italic"}>
+        {value || placeholder}
+      </span>
+      <span className="ml-2 opacity-0 group-hover:opacity-100 text-xs text-muted-foreground">
+        Click to edit
+      </span>
+    </div>
+  );
+}
+
+// Number input for score editing
+function ScoreInput({
+  value,
+  onChange,
+  min = -20,
+  max = 20,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(String(value));
+
+  const handleSave = () => {
+    const num = parseInt(editValue, 10);
+    if (!isNaN(num)) {
+      onChange(Math.max(min, Math.min(max, num)));
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(String(value));
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    }
+    if (e.key === "Escape") {
+      handleCancel();
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          className="w-20 rounded-md border border-primary bg-background px-2 py-1 text-sm text-center outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          min={min}
+          max={max}
+          autoFocus
+        />
+        <button
+          onClick={handleSave}
+          className="rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          ✓
+        </button>
+        <button
+          onClick={handleCancel}
+          className="rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/80"
+        >
+          ✕
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setIsEditing(true)}
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition hover:bg-muted ${
+        value > 0 ? "text-emerald-600 bg-emerald-50" : value < 0 ? "text-red-600 bg-red-50" : "text-muted-foreground bg-muted"
+      }`}
+      title="Click to edit score"
+    >
+      {value > 0 ? "+" : ""}{value}
+    </button>
+  );
+}
+
 export default function Home() {
   const [sourceText, setSourceText] = useState("");
   const [submittedText, setSubmittedText] = useState("");
-  const [editorText, setEditorText] = useState("");
   const [generatedSpec, setGeneratedSpec] = useState<QuizSpec | null>(null);
   const [savedQuizId, setSavedQuizId] = useState<string | null>(null);
   const [issues, setIssues] = useState<string[]>([]);
@@ -98,14 +284,10 @@ export default function Home() {
         setGeneratedSpec(null);
         setIssues(payload.issues ?? []);
 
-        if (payload.rawOutput) {
-          setEditorText(payload.rawOutput);
-        }
-
         setGenerationState({
           message:
             payload.errorMessage ??
-            "Quiz generation failed. Update the prompt or fix the JSON manually.",
+            "Quiz generation failed. Try updating your prompt.",
           tone: "error",
         });
         return;
@@ -114,7 +296,7 @@ export default function Home() {
       if (!response.ok) {
         setGeneratedSpec(null);
         setGenerationState({
-          message: "Quiz generation failed. Update the prompt or fix the JSON manually.",
+          message: "Quiz generation failed. Try updating your prompt.",
           tone: "error",
         });
         return;
@@ -122,7 +304,6 @@ export default function Home() {
 
       setGeneratedSpec(payload.spec);
       setSavedQuizId(null);
-      setEditorText(JSON.stringify(payload.spec, null, 2));
       setIssues([]);
       setGenerationState({
         message: payload.repaired
@@ -187,31 +368,10 @@ export default function Home() {
     }
   };
 
-  const handleValidateEditor = async () => {
-    const result = parseQuizSpec(editorText);
-
-    if (!result.success) {
-      setGeneratedSpec(null);
-      setSavedQuizId(null);
-      setIssues(result.issues);
-      setGenerationState({
-        message:
-          "The JSON editor content is invalid. Fix the issues below or re-run the prompt.",
-        tone: "error",
-      });
-      return;
-    }
-
-    setGeneratedSpec(result.spec);
+  const handleSaveEdited = async () => {
+    if (!generatedSpec) return;
     setSavedQuizId(null);
-    setEditorText(JSON.stringify(result.spec, null, 2));
-    setIssues([]);
-    setGenerationState({
-      message: "Manual JSON is valid and ready to use.",
-      tone: "success",
-    });
-
-    await saveQuiz(result.spec);
+    await saveQuiz(generatedSpec);
   };
 
   const handleCopyShareLink = async () => {
@@ -233,6 +393,165 @@ export default function Home() {
     }
   };
 
+  // Update quiz metadata
+  const updateQuizTitle = (title: string) => {
+    if (!generatedSpec) return;
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: { ...generatedSpec.quiz, title },
+    });
+  };
+
+  const updateQuizDescription = (description: string) => {
+    if (!generatedSpec) return;
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: { ...generatedSpec.quiz, description },
+    });
+  };
+
+  const updateQuizScoreLabel = (scoreLabel: string) => {
+    if (!generatedSpec) return;
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: {
+        ...generatedSpec.quiz,
+        scoring: { ...generatedSpec.quiz.scoring, scoreLabel },
+      },
+    });
+  };
+
+  // Update question
+  const updateQuestion = (index: number, updates: Partial<QuizQuestion>) => {
+    if (!generatedSpec) return;
+    const newQuestions = [...generatedSpec.quiz.questions];
+    newQuestions[index] = { ...newQuestions[index], ...updates } as QuizQuestion;
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: { ...generatedSpec.quiz, questions: newQuestions },
+    });
+  };
+
+  // Update option for a question
+  const updateOption = (questionIndex: number, optionIndex: number, updates: Partial<ChoiceOption>) => {
+    if (!generatedSpec) return;
+    const question = generatedSpec.quiz.questions[questionIndex];
+    if (!("options" in question)) return;
+
+    const newOptions = [...question.options];
+    newOptions[optionIndex] = { ...newOptions[optionIndex], ...updates };
+    updateQuestion(questionIndex, { options: newOptions } as Partial<QuizQuestion>);
+  };
+
+  // Remove an option from a question
+  const removeOption = (questionIndex: number, optionIndex: number) => {
+    if (!generatedSpec) return;
+    const question = generatedSpec.quiz.questions[questionIndex];
+    if (!("options" in question)) return;
+    if (question.options.length <= 2) return; // Keep at least 2 options
+
+    const newOptions = question.options.filter((_, i) => i !== optionIndex);
+    updateQuestion(questionIndex, { options: newOptions } as Partial<QuizQuestion>);
+  };
+
+  // Regenerate options for a question
+  const [regeneratingQuestionIndex, setRegeneratingQuestionIndex] = useState<number | null>(null);
+
+  const regenerateOptions = async (questionIndex: number) => {
+    if (!generatedSpec) return;
+    const question = generatedSpec.quiz.questions[questionIndex];
+    
+    // Only works for multiple choice or image_choice questions
+    if (!("options" in question)) {
+      setGenerationState({
+        message: "Cannot regenerate options for this question type.",
+        tone: "error",
+      });
+      return;
+    }
+
+    setRegeneratingQuestionIndex(questionIndex);
+    setGenerationState({
+      message: `Regenerating options for question ${questionIndex + 1}...`,
+      tone: "info",
+    });
+
+    try {
+      const response = await fetch("/api/quiz-spec/regenerate-options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questionTitle: question.title,
+          questionDescription: "description" in question ? question.description : undefined,
+          questionType: question.type,
+          numOptions: question.options.length,
+          context: generatedSpec.quiz.description,
+        }),
+      });
+
+      const payload = (await response.json()) as RegenerateOptionsResponse;
+
+      if (!payload.ok) {
+        setGenerationState({
+          message: `Failed to regenerate options: ${payload.error}`,
+          tone: "error",
+        });
+        return;
+      }
+
+      // Update the question with new options while preserving structure
+      updateQuestion(questionIndex, { options: payload.options } as Partial<QuizQuestion>);
+      setGenerationState({
+        message: `Options regenerated for question ${questionIndex + 1}. Save to persist.`,
+        tone: "success",
+      });
+    } catch (error) {
+      setGenerationState({
+        message: `Error regenerating options: ${error instanceof Error ? error.message : "Unknown error"}`,
+        tone: "error",
+      });
+    } finally {
+      setRegeneratingQuestionIndex(null);
+    }
+  };
+
+  // Update result band
+  const updateResultBand = (index: number, updates: Partial<ResultBand>) => {
+    if (!generatedSpec) return;
+    const newBands = [...generatedSpec.quiz.resultsScreen.bands];
+    newBands[index] = { ...newBands[index], ...updates };
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: {
+        ...generatedSpec.quiz,
+        resultsScreen: { ...generatedSpec.quiz.resultsScreen, bands: newBands },
+      },
+    });
+  };
+
+  // Remove question
+  const removeQuestion = (index: number) => {
+    if (!generatedSpec) return;
+    const newQuestions = generatedSpec.quiz.questions.filter((_, i) => i !== index);
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: { ...generatedSpec.quiz, questions: newQuestions },
+    });
+  };
+
+  // Move question up/down
+  const moveQuestion = (index: number, direction: -1 | 1) => {
+    if (!generatedSpec) return;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= generatedSpec.quiz.questions.length) return;
+    const newQuestions = [...generatedSpec.quiz.questions];
+    [newQuestions[index], newQuestions[newIndex]] = [newQuestions[newIndex], newQuestions[index]];
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: { ...generatedSpec.quiz, questions: newQuestions },
+    });
+  };
+
   return (
     <main className="min-h-screen bg-background px-6 py-12">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
@@ -243,7 +562,7 @@ export default function Home() {
             </p>
             <h1 className="text-4xl font-semibold tracking-tight">Text-to-Quiz</h1>
             <p className="max-w-2xl text-lg text-muted-foreground">
-              Paste or type source material below, then generate a quiz from it.
+              Describe the quiz you want in plain text. Then edit it visually before sharing.
             </p>
           </div>
 
@@ -345,9 +664,6 @@ export default function Home() {
                     Re-run prompt
                   </Button>
                 ) : null}
-                <Button onClick={handleValidateEditor} type="button" variant="secondary">
-                  Validate edited JSON
-                </Button>
               </div>
 
               {shareUrl ? (
@@ -384,107 +700,323 @@ export default function Home() {
           </section>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
+        {/* Single preview/editor section */}
+        <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">Quiz preview & editor</h2>
+              <p className="text-sm text-muted-foreground">
+                Click any text to edit it directly. Save your changes when done.
+              </p>
+            </div>
+            {generatedSpec && (
+              <Button onClick={handleSaveEdited} variant="secondary" size="sm">
+                Save changes
+              </Button>
+            )}
+          </div>
+
+          {generatedSpec ? (
+            <div className="space-y-6">
+              {/* Quiz header */}
+              <div className="rounded-2xl bg-muted/40 p-4 space-y-3">
                 <div>
-                  <h2 className="text-lg font-semibold tracking-tight">
-                    Manual quiz spec editor
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    If generation fails or you want to tweak the output, edit the JSON here and validate it.
+                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                    Quiz title
                   </p>
+                  <EditableField
+                    value={generatedSpec.quiz.title}
+                    onChange={updateQuizTitle}
+                    placeholder="Enter quiz title..."
+                    className="text-base font-semibold"
+                    maxLength={120}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                    Description
+                  </p>
+                  <EditableField
+                    value={generatedSpec.quiz.description}
+                    onChange={updateQuizDescription}
+                    placeholder="Enter quiz description..."
+                    multiline
+                    maxLength={400}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                    Score label
+                  </p>
+                  <EditableField
+                    value={generatedSpec.quiz.scoring.scoreLabel}
+                    onChange={updateQuizScoreLabel}
+                    placeholder="Enter score label..."
+                    maxLength={40}
+                  />
                 </div>
               </div>
-              <textarea
-                className="min-h-[28rem] w-full rounded-2xl border border-input bg-background px-4 py-3 font-mono text-sm outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                onChange={(event) => setEditorText(event.target.value)}
-                placeholder='{"version":"1.0","quiz":{...}}'
-                value={editorText}
-              />
-              {issues.length > 0 ? (
-                <div className="rounded-2xl bg-destructive/10 p-4 text-sm text-destructive">
-                  <p className="font-medium">Validation issues</p>
-                  <ul className="mt-2 list-disc space-y-1 pl-5">
-                    {issues.map((issue) => (
-                      <li key={issue}>{issue}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
-          </section>
 
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold tracking-tight">Structured preview</h2>
-                <p className="text-sm text-muted-foreground">
-                  This reflects the validated quiz schema, including question types, scoring, branching, and results.
-                </p>
-              </div>
-
-              {generatedSpec ? (
-                <>
-                  <div className="rounded-2xl bg-muted/40 p-4">
-                    <h3 className="text-base font-semibold">{generatedSpec.quiz.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {generatedSpec.quiz.description}
-                    </p>
-                    <p className="mt-3 text-sm text-foreground">
-                      <span className="font-medium">Scoring:</span>{" "}
-                      0-100{" "}
-                      {generatedSpec.quiz.scoring.scoreLabel.toLowerCase()}
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    {generatedSpec.quiz.questions.map((question) => (
-                      <div
-                        className="rounded-2xl border border-border p-4"
-                        key={question.id}
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-medium">{question.title}</p>
-                          <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
-                            {question.type}
-                          </span>
-                        </div>
-                        {question.description ? (
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            {question.description}
+              {/* Questions */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Questions ({generatedSpec.quiz.questions.length})
+                </h3>
+                {generatedSpec.quiz.questions.map((question, index) => (
+                  <div
+                    className="rounded-2xl border border-border p-4 space-y-4"
+                    key={question.id}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                            Question {index + 1}
                           </p>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="rounded-2xl border border-border p-4">
-                    <h3 className="font-medium">Results screen</h3>
-                    <div className="mt-3 space-y-2">
-                      {generatedSpec.quiz.resultsScreen.bands.map((band) => (
-                        <div
-                          className="rounded-xl bg-muted/40 px-3 py-2 text-sm"
-                          key={band.id}
-                        >
-                          <span className="font-medium">{band.title}</span>{" "}
-                          <span className="text-muted-foreground">
-                            ({band.minPercent}%–{band.maxPercent}%)
-                          </span>
+                          <EditableField
+                            value={question.title}
+                            onChange={(title) => updateQuestion(index, { title })}
+                            placeholder="Enter question title..."
+                            className="font-medium"
+                            maxLength={180}
+                          />
                         </div>
-                      ))}
+                        {"description" in question && (
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                              Description (optional)
+                            </p>
+                            <EditableField
+                              value={question.description || ""}
+                              onChange={(description) => updateQuestion(index, { description })}
+                              placeholder="Enter question description..."
+                              multiline
+                              maxLength={400}
+                            />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                            {question.type.replace("_", " ")}
+                          </span>
+                          {"options" in question && (
+                            <span className="text-xs text-muted-foreground">
+                              {question.options.length} options
+                            </span>
+                          )}
+                          {"allowMultiple" in question && (
+                            <span className="text-xs text-muted-foreground">
+                              {question.allowMultiple ? "Multi-select" : "Single-select"}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => moveQuestion(index, -1)}
+                          disabled={index === 0}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          title="Move up"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => moveQuestion(index, 1)}
+                          disabled={index === generatedSpec.quiz.questions.length - 1}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          title="Move down"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => removeQuestion(index)}
+                          className="rounded-md p-1.5 text-destructive hover:bg-destructive/10"
+                          title="Remove question"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Options section */}
+                    {"options" in question && (
+                      <div className="space-y-3 border-t border-border pt-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                            Answer Options
+                          </p>
+                          <button
+                            onClick={() => regenerateOptions(index)}
+                            disabled={regeneratingQuestionIndex === index}
+                            className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition disabled:opacity-50"
+                          >
+                            {regeneratingQuestionIndex === index ? (
+                              <>
+                                <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Regenerating...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Regenerate Answers
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {question.options.map((option, optionIndex) => (
+                            <div
+                              key={option.id}
+                              className="rounded-xl border border-border/50 bg-muted/30 p-3 space-y-2"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                  <EditableField
+                                    value={option.label}
+                                    onChange={(label) => updateOption(index, optionIndex, { label })}
+                                    placeholder="Option text..."
+                                    maxLength={140}
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <ScoreInput
+                                    value={option.scoreDelta}
+                                    onChange={(scoreDelta) => updateOption(index, optionIndex, { scoreDelta })}
+                                  />
+                                  <button
+                                    onClick={() => removeOption(index, optionIndex)}
+                                    disabled={question.options.length <= 2}
+                                    className="rounded-md p-1.5 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                                    title="Remove option"
+                                  >
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                              {option.helperText && (
+                                <div className="pl-2 border-l-2 border-border">
+                                  <EditableField
+                                    value={option.helperText}
+                                    onChange={(helperText) => updateOption(index, optionIndex, { helperText })}
+                                    placeholder="Helper text (optional)..."
+                                    className="text-xs text-muted-foreground"
+                                    maxLength={240}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Yes/No specific editing */}
+                    {question.type === "yes_no" && (
+                      <div className="grid grid-cols-2 gap-3 border-t border-border pt-3">
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                            Yes label
+                          </p>
+                          <EditableField
+                            value={question.yesLabel}
+                            onChange={(yesLabel) => updateQuestion(index, { yesLabel })}
+                            placeholder="Yes"
+                            maxLength={40}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                            No label
+                          </p>
+                          <EditableField
+                            value={question.noLabel}
+                            onChange={(noLabel) => updateQuestion(index, { noLabel })}
+                            placeholder="No"
+                            maxLength={40}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-sm text-muted-foreground">
-                  No valid quiz spec yet. Generate one from a prompt or validate the edited JSON.
+                ))}
+              </div>
+
+              {/* Results */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Result bands ({generatedSpec.quiz.resultsScreen.bands.length})
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {generatedSpec.quiz.resultsScreen.bands.map((band, index) => (
+                    <div
+                      className="rounded-2xl border border-border p-4 space-y-3"
+                      key={band.id}
+                    >
+                      <div>
+                        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                          {band.minPercent}%–{band.maxPercent}%
+                        </p>
+                        <EditableField
+                          value={band.title}
+                          onChange={(title) => updateResultBand(index, { title })}
+                          placeholder="Enter band title..."
+                          className="font-medium"
+                          maxLength={120}
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                          Description
+                        </p>
+                        <EditableField
+                          value={band.description}
+                          onChange={(description) => updateResultBand(index, { description })}
+                          placeholder="Enter band description..."
+                          multiline
+                          maxLength={400}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
-          </section>
-        </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-12 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                No quiz generated yet.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Enter a prompt above and click "Generate Quiz" to get started.
+              </p>
+            </div>
+          )}
+
+          {issues.length > 0 ? (
+            <div className="mt-6 rounded-2xl bg-destructive/10 p-4 text-sm text-destructive">
+              <p className="font-medium">Validation issues</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {issues.map((issue) => (
+                  <li key={issue}>{issue}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
       </div>
     </main>
   );
