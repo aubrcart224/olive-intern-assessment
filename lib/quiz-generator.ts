@@ -18,9 +18,9 @@ Requirements:
 - Use stable kebab-case ids for all question ids, option ids, and result ids.
 - Prefer yes_no over two-option multiple_choice when the prompt is binary.
 - For image_choice questions, include image.alt and at least one of image.imageUrl or image.imagePrompt.
-- Keep scoring simple integer deltas and use scoring.model = "sum".
+- Keep scoring simple integer deltas and use scoring.model = "normalized_100".
 - Use branching only when it materially improves the flow.
-- Every quiz must include a resultsScreen with score bands that cover the scoring range.
+- Every quiz must include a resultsScreen with score bands that cover the full 0-100 percentage range without gaps (e.g., 0-25, 26-50, 51-75, 76-100).
 - If the prompt is underspecified, make the safest reasonable product choice and encode it in the spec rather than asking questions.
 
 Required JSON shape:
@@ -32,9 +32,7 @@ Required JSON shape:
     "promptIntent": string,
     "questionTypesUsed": string[],
     "scoring": {
-      "model": "sum",
-      "minimumScore": integer,
-      "maximumScore": integer,
+      "model": "normalized_100",
       "scoreLabel": string
     },
     "questions": [
@@ -72,8 +70,8 @@ Required JSON shape:
           "id": "kebab-case",
           "title": string,
           "description": string,
-          "minScore": integer,
-          "maxScore": integer,
+          "minPercent": integer (0-100),
+          "maxPercent": integer (0-100),
           "ctaLabel": string?,
           "ctaHref": string?
         }

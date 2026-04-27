@@ -218,17 +218,17 @@ const resultBandSchema = z
     id: idSchema,
     title: z.string().min(1).max(120),
     description: z.string().min(1).max(400),
-    minScore: z.number().int(),
-    maxScore: z.number().int(),
+    minPercent: z.number().int().min(0).max(100),
+    maxPercent: z.number().int().min(0).max(100),
     ctaLabel: z.string().min(1).max(80).optional(),
     ctaHref: z.string().url().optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.minScore > value.maxScore) {
+    if (value.minPercent > value.maxPercent) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "minScore must be less than or equal to maxScore.",
-        path: ["minScore"],
+        message: "minPercent must be less than or equal to maxPercent.",
+        path: ["minPercent"],
       });
     }
   });
@@ -248,9 +248,7 @@ const quizCoreSchema = z
       ]),
     ),
     scoring: z.object({
-      model: z.literal("sum"),
-      minimumScore: z.number().int(),
-      maximumScore: z.number().int(),
+      model: z.literal("normalized_100"),
       scoreLabel: z.string().min(1).max(40),
     }),
     questions: z.array(quizQuestionSchema).min(1).max(12),
@@ -338,26 +336,34 @@ const quizCoreSchema = z
       });
     });
 
-    if (value.scoring.minimumScore > value.scoring.maximumScore) {
+    // Validate that result bands cover the full 0-100 range without gaps
+    const sortedBands = [...value.resultsScreen.bands].sort((a, b) => a.minPercent - b.minPercent);
+
+    if (sortedBands[0]?.minPercent !== 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "minimumScore must be less than or equal to maximumScore.",
-        path: ["scoring", "minimumScore"],
+        message: "Result bands must start at 0%.",
+        path: ["resultsScreen", "bands", 0, "minPercent"],
       });
     }
 
-    value.resultsScreen.bands.forEach((band, bandIndex) => {
-      if (
-        band.minScore < value.scoring.minimumScore ||
-        band.maxScore > value.scoring.maximumScore
-      ) {
+    if (sortedBands[sortedBands.length - 1]?.maxPercent !== 100) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Result bands must end at 100%.",
+        path: ["resultsScreen", "bands", sortedBands.length - 1, "maxPercent"],
+      });
+    }
+
+    for (let i = 0; i < sortedBands.length - 1; i++) {
+      if (sortedBands[i]!.maxPercent + 1 !== sortedBands[i + 1]!.minPercent) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Result bands must fall within the scoring range.",
-          path: ["resultsScreen", "bands", bandIndex],
+          message: `Gap or overlap between result bands: ${sortedBands[i]!.id} ends at ${sortedBands[i]!.maxPercent} but ${sortedBands[i + 1]!.id} starts at ${sortedBands[i + 1]!.minPercent}.`,
+          path: ["resultsScreen", "bands", i, "maxPercent"],
         });
       }
-    });
+    }
   });
 
 export const quizSpecSchema = z.object({

@@ -92,6 +92,48 @@ function getQuestionScore(question: QuizQuestion, answer: AnswerValue) {
   }
 }
 
+function getQuestionScoreRange(question: QuizQuestion): { min: number; max: number } {
+  switch (question.type) {
+    case "multiple_choice":
+    case "image_choice": {
+      // For multi-select, we need to consider combinations
+      // Min = 0 (select nothing) or lowest negative delta
+      // Max = sum of all positive deltas
+      const deltas = question.options.map((o) => o.scoreDelta);
+      const minDelta = Math.min(...deltas);
+      const maxPositiveSum = deltas.filter((d) => d > 0).reduce((a, b) => a + b, 0);
+      const maxNegativeSum = deltas.filter((d) => d < 0).reduce((a, b) => a + b, 0);
+      return {
+        min: question.allowMultiple ? maxNegativeSum : minDelta,
+        max: question.allowMultiple ? maxPositiveSum : Math.max(...deltas),
+      };
+    }
+    case "yes_no": {
+      return {
+        min: Math.min(question.scoreDelta.yes, question.scoreDelta.no),
+        max: Math.max(question.scoreDelta.yes, question.scoreDelta.no),
+      };
+    }
+    case "slider": {
+      const deltas = question.scoreBands.map((b) => b.scoreDelta);
+      return {
+        min: Math.min(...deltas),
+        max: Math.max(...deltas),
+      };
+    }
+    case "free_text": {
+      if (question.evaluation.mode === "manual_review") {
+        return { min: question.evaluation.defaultScoreDelta, max: question.evaluation.defaultScoreDelta };
+      }
+      const deltas = question.evaluation.keywordBuckets.map((b) => b.scoreDelta);
+      return {
+        min: Math.min(...deltas, question.evaluation.fallbackScoreDelta),
+        max: Math.max(...deltas, question.evaluation.fallbackScoreDelta),
+      };
+    }
+  }
+}
+
 function matchesBranchCondition(
   question: QuizQuestion,
   answer: AnswerValue,
@@ -163,33 +205,50 @@ function resolveNextStep(
   };
 }
 
+function normalizeScoreTo100(spec: QuizSpec, rawScore: number): number {
+  // Calculate theoretical min and max possible scores
+  const ranges = spec.quiz.questions.map((q) => getQuestionScoreRange(q));
+  const totalMin = ranges.reduce((sum, r) => sum + r.min, 0);
+  const totalMax = ranges.reduce((sum, r) => sum + r.max, 0);
+
+  // Handle edge case where all questions have same min/max
+  if (totalMax === totalMin) {
+    return 50; // Middle of the road
+  }
+
+  // Normalize to 0-100 scale
+  const normalized = ((rawScore - totalMin) / (totalMax - totalMin)) * 100;
+  return Math.round(Math.max(0, Math.min(100, normalized)));
+}
+
 function getResultBand(
   spec: QuizSpec,
   answers: AnswerMap,
   forcedResultId: string | null,
 ) {
+  // Calculate raw score
+  const rawScore = spec.quiz.questions.reduce(
+    (t, q) => t + getQuestionScore(q, answers[q.id]),
+    0,
+  );
+
+  // Normalize to 0-100
+  const score = normalizeScoreTo100(spec, rawScore);
+
   if (forcedResultId) {
     const forced = spec.quiz.resultsScreen.bands.find(
       (b) => b.id === forcedResultId,
     );
     if (forced) {
-      return {
-        score: spec.quiz.questions.reduce(
-          (t, q) => t + getQuestionScore(q, answers[q.id]),
-          0,
-        ),
-        band: forced,
-      };
+      return { score, band: forced };
     }
   }
-  const score = spec.quiz.questions.reduce(
-    (t, q) => t + getQuestionScore(q, answers[q.id]),
-    0,
-  );
+
+  // Find band by percentage range (minPercent, maxPercent)
   const band =
     spec.quiz.resultsScreen.bands.find(
-      (c) => score >= c.minScore && score <= c.maxScore,
-    ) ?? spec.quiz.resultsScreen.bands[0];
+      (c) => score >= c.minPercent && score <= c.maxPercent,
+    ) ?? spec.quiz.resultsScreen.bands[0]!;
   return { score, band };
 }
 
@@ -703,7 +762,7 @@ export function QuizPlayer({ spec }: QuizPlayerProps) {
                       spec.quiz.scoring.scoreLabel}
                   </span>
                   <span className="text-3xl font-bold text-olive-700">
-                    {result.score}
+                    {result.score}%
                   </span>
                 </div>
               )}

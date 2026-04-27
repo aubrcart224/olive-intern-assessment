@@ -376,8 +376,7 @@ export default function Home() {
                     </p>
                     <p className="mt-3 text-sm text-foreground">
                       <span className="font-medium">Scoring:</span>{" "}
-                      {generatedSpec.quiz.scoring.minimumScore} to{" "}
-                      {generatedSpec.quiz.scoring.maximumScore}{" "}
+                      0-100{" "}
                       {generatedSpec.quiz.scoring.scoreLabel.toLowerCase()}
                     </p>
                   </div>
@@ -413,7 +412,7 @@ export default function Home() {
                         >
                           <span className="font-medium">{band.title}</span>{" "}
                           <span className="text-muted-foreground">
-                            ({band.minScore}–{band.maxScore})
+                            ({band.minPercent}%–{band.maxPercent}%)
                           </span>
                         </div>
                       ))}
