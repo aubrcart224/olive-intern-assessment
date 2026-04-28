@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Trash2,
   Users,
 } from "lucide-react";
 
@@ -96,6 +97,7 @@ export default function DashboardPage() {
   const [sessions, setSessions] = useState<QuizSessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const supabase = createBrowserClient();
@@ -160,6 +162,44 @@ export default function DashboardPage() {
   const goPrevQuiz = () => {
     if (quizIndex > 0) {
       setSelectedQuizId(quizzes[quizIndex - 1].id);
+    }
+  };
+
+  const handleDeleteQuiz = async () => {
+    if (!selectedQuizId) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this quiz? This will also delete all associated responses. This action cannot be undone."
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/quiz/delete?id=${selectedQuizId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "Failed to delete quiz");
+      }
+
+      // Remove deleted quiz from state
+      setQuizzes((prev) => prev.filter((q) => q.id !== selectedQuizId));
+      setSessions((prev) => prev.filter((s) => s.quiz_id !== selectedQuizId));
+
+      // Select another quiz if available
+      const remainingQuizzes = quizzes.filter((q) => q.id !== selectedQuizId);
+      if (remainingQuizzes.length > 0) {
+        setSelectedQuizId(remainingQuizzes[0].id);
+      } else {
+        setSelectedQuizId(null);
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to delete quiz");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -298,6 +338,16 @@ export default function DashboardPage() {
                     Open quiz
                   </Button>
                 </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+                  onClick={handleDeleteQuiz}
+                  disabled={deleting}
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  {deleting ? "Deleting..." : "Delete"}
+                </Button>
               </div>
             </div>
 
