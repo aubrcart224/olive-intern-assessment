@@ -12,7 +12,7 @@ const REGENERATE_OPTIONS_MODEL =
 const regenerateOptionsSchema = z.object({
   questionTitle: z.string().min(1).max(180),
   questionDescription: z.string().max(400).optional(),
-  questionType: z.enum(["multiple_choice", "yes_no", "slider", "free_text", "image_choice"]),
+  questionType: z.enum(["multiple_choice", "yes_no", "slider"]),
   numOptions: z.number().int().min(2).max(8).default(4),
   context: z.string().optional(), // Additional context about the quiz
 });

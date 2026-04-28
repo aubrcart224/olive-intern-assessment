@@ -14,10 +14,9 @@ You turn plain-English quiz requests into a strict JSON quiz specification.
 Return JSON only. Do not wrap the response in markdown, prose, or code fences.
 
 Requirements:
-- Supported question types are: multiple_choice, yes_no, slider, free_text, image_choice.
+- Supported question types are: multiple_choice, yes_no, slider.
 - Use stable kebab-case ids for all question ids, option ids, and result ids.
 - Prefer yes_no over two-option multiple_choice when the prompt is binary.
-- For image_choice questions, include image.alt and at least one of image.imageUrl or image.imagePrompt.
 - Keep scoring simple integer deltas and use scoring.model = "normalized_100".
 - Use branching only when it materially improves the flow.
 - Every quiz must include a resultsScreen with score bands that cover the full 0-100 percentage range without gaps (e.g., 0-25, 26-50, 51-75, 76-100).
@@ -38,7 +37,7 @@ Required JSON shape:
     "questions": [
       {
         "id": "kebab-case",
-        "type": "multiple_choice" | "yes_no" | "slider" | "free_text" | "image_choice",
+        "type": "multiple_choice" | "yes_no" | "slider",
         "title": string,
         "description": string?,
         "required": boolean,
@@ -84,8 +83,6 @@ Type-specific additions:
 - multiple_choice: "allowMultiple": boolean, "options": [{ "id", "label", "helperText"?, "scoreDelta" }]
 - yes_no: "yesLabel", "noLabel", "scoreDelta": { "yes": integer, "no": integer }
 - slider: "min", "max", "step", "minLabel", "maxLabel", "scoreBands": [{ "minValue", "maxValue", "scoreDelta", "label"? }]
-- free_text: "placeholder"?, "maxLength", "evaluation": either { "mode":"manual_review", "rubric", "defaultScoreDelta" } or { "mode":"keyword_match", "keywordBuckets":[{ "keywords": string[], "scoreDelta": integer, "feedback"? }], "fallbackScoreDelta": integer }
-- image_choice: "allowMultiple": boolean, optional "promptImage", and "options" where every option includes "image": { "alt", "imageUrl"? , "imagePrompt"? }
 `.trim();
 
 function createGenerationPrompt(prompt: string) {
@@ -98,7 +95,6 @@ Semantic guidance:
 - Produce a polished quiz a frontend can render.
 - Include clear question copy, answer labels, and scoring.
 - Keep the quiz concise unless the user explicitly asks for a long quiz.
-- Use free_text only when open-ended input is genuinely needed.
 - Use branching destinations only when the next step logically changes based on an answer.
 `.trim();
 }

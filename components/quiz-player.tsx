@@ -23,14 +23,11 @@ type QuizPlayerProps = {
 function getInitialAnswer(question: QuizQuestion): AnswerValue {
   switch (question.type) {
     case "multiple_choice":
-    case "image_choice":
       return [];
     case "yes_no":
       return null;
     case "slider":
       return question.min;
-    case "free_text":
-      return "";
   }
 }
 
@@ -44,21 +41,17 @@ function isQuestionAnswered(question: QuizQuestion, answer: AnswerValue) {
   if (!question.required) return true;
   switch (question.type) {
     case "multiple_choice":
-    case "image_choice":
       return Array.isArray(answer) && answer.length > 0;
     case "yes_no":
       return typeof answer === "boolean";
     case "slider":
       return typeof answer === "number";
-    case "free_text":
-      return typeof answer === "string" && answer.trim().length > 0;
   }
 }
 
 function getQuestionScore(question: QuizQuestion, answer: AnswerValue) {
   switch (question.type) {
-    case "multiple_choice":
-    case "image_choice": {
+    case "multiple_choice": {
       if (!Array.isArray(answer)) return 0;
       return question.options.reduce(
         (total, o) => total + (answer.includes(o.id) ? o.scoreDelta : 0),
@@ -79,24 +72,12 @@ function getQuestionScore(question: QuizQuestion, answer: AnswerValue) {
         )?.scoreDelta ?? 0
       );
     }
-    case "free_text": {
-      if (typeof answer !== "string" || answer.trim().length === 0) return 0;
-      if (question.evaluation.mode === "manual_review") {
-        return question.evaluation.defaultScoreDelta;
-      }
-      const normalized = answer.toLowerCase();
-      const bucket = question.evaluation.keywordBuckets.find((b) =>
-        b.keywords.some((k) => normalized.includes(k.toLowerCase())),
-      );
-      return bucket?.scoreDelta ?? question.evaluation.fallbackScoreDelta;
-    }
   }
 }
 
 function getQuestionScoreRange(question: QuizQuestion): { min: number; max: number } {
   switch (question.type) {
-    case "multiple_choice":
-    case "image_choice": {
+    case "multiple_choice": {
       // For multi-select, we need to consider combinations
       // Min = 0 (select nothing) or lowest negative delta
       // Max = sum of all positive deltas
@@ -120,16 +101,6 @@ function getQuestionScoreRange(question: QuizQuestion): { min: number; max: numb
       return {
         min: Math.min(...deltas),
         max: Math.max(...deltas),
-      };
-    }
-    case "free_text": {
-      if (question.evaluation.mode === "manual_review") {
-        return { min: question.evaluation.defaultScoreDelta, max: question.evaluation.defaultScoreDelta };
-      }
-      const deltas = question.evaluation.keywordBuckets.map((b) => b.scoreDelta);
-      return {
-        min: Math.min(...deltas, question.evaluation.fallbackScoreDelta),
-        max: Math.max(...deltas, question.evaluation.fallbackScoreDelta),
       };
     }
   }
@@ -315,71 +286,6 @@ function AnswerCard({
   );
 }
 
-function ImageAnswerCard({
-  children,
-  imageUrl,
-  imagePrompt,
-  imageAlt,
-  isSelected,
-  onClick,
-  index,
-}: {
-  children: ReactNode;
-  imageUrl?: string;
-  imagePrompt?: string;
-  imageAlt: string;
-  isSelected: boolean;
-  onClick: () => void;
-  index: number;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      type="button"
-      className={cn(
-        "group relative w-full overflow-hidden rounded-2xl border-2 text-left transition-all duration-200 ease-out",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-olive-400 focus-visible:ring-offset-2",
-        isSelected
-          ? "border-olive-500 shadow-lg shadow-olive-500/15"
-          : "border-olive-100 bg-white hover:border-olive-300 hover:shadow-md",
-      )}
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-olive-50">
-        {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt={imageAlt}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            src={imageUrl}
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-olive-400">
-            {imagePrompt}
-          </div>
-        )}
-        <div
-          className={cn(
-            "absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold transition-colors",
-            isSelected
-              ? "bg-olive-500 text-white"
-              : "bg-white/90 text-olive-700 backdrop-blur-sm",
-          )}
-        >
-          {index + 1}
-        </div>
-      </div>
-      <div
-        className={cn(
-          "px-5 py-4",
-          isSelected ? "bg-olive-500 text-white" : "bg-white text-charcoal",
-        )}
-      >
-        {children}
-      </div>
-    </button>
-  );
-}
-
 function QuestionRenderer({
   question,
   answer,
@@ -449,52 +355,6 @@ function QuestionRenderer({
       );
     }
 
-    case "image_choice": {
-      const selected = Array.isArray(answer) ? answer : [];
-      return (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {question.options.map((opt, i) => {
-            const isSelected = selected.includes(opt.id);
-            return (
-              <ImageAnswerCard
-                key={opt.id}
-                index={i}
-                isSelected={isSelected}
-                imageUrl={opt.image.imageUrl}
-                imagePrompt={opt.image.imagePrompt}
-                imageAlt={opt.image.alt}
-                onClick={() => {
-                  if (question.allowMultiple) {
-                    onAnswerChange(
-                      isSelected
-                        ? selected.filter((id) => id !== opt.id)
-                        : [...selected, opt.id],
-                    );
-                  } else {
-                    handleChoice([opt.id], true);
-                  }
-                }}
-              >
-                <p className="text-sm font-semibold">{opt.label}</p>
-                {opt.helperText ? (
-                  <p
-                    className={cn(
-                      "mt-1 text-xs leading-relaxed",
-                      isSelected
-                        ? "text-white/80"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {opt.helperText}
-                  </p>
-                ) : null}
-              </ImageAnswerCard>
-            );
-          })}
-        </div>
-      );
-    }
-
     case "yes_no": {
       const options = [
         { value: true, label: question.yesLabel },
@@ -551,31 +411,6 @@ function QuestionRenderer({
       );
     }
 
-    case "free_text": {
-      const text = typeof answer === "string" ? answer : "";
-      return (
-        <div className="mx-auto w-full max-w-xl">
-          <textarea
-            value={text}
-            onChange={(e) => onAnswerChange(e.target.value)}
-            placeholder={question.placeholder ?? "Type your answer here..."}
-            maxLength={question.maxLength}
-            rows={6}
-            className={cn(
-              "w-full resize-none rounded-2xl border-2 border-olive-100 bg-white px-5 py-4 text-lg leading-relaxed",
-              "text-charcoal placeholder:text-olive-300",
-              "transition-all duration-200",
-              "focus:border-olive-400 focus:outline-none focus:ring-2 focus:ring-olive-400/20",
-            )}
-          />
-          <div className="mt-3 flex justify-end">
-            <span className="text-xs font-medium text-olive-400">
-              {text.length}/{question.maxLength}
-            </span>
-          </div>
-        </div>
-      );
-    }
   }
 }
 
@@ -666,10 +501,7 @@ export function QuizPlayer({ spec, quizId }: QuizPlayerProps) {
           goToNext();
         }
       }
-      if (
-        currentQuestion.type === "multiple_choice" ||
-        currentQuestion.type === "image_choice"
-      ) {
+      if (currentQuestion.type === "multiple_choice") {
         const num = parseInt(e.key, 10);
         if (!isNaN(num) && num >= 1 && num <= currentQuestion.options.length) {
           e.preventDefault();

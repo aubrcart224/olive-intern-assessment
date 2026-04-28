@@ -13,7 +13,7 @@ Semantic guidance:
 - Produce a polished quiz a frontend can render.
 - Include clear question copy, answer labels, and scoring.
 - Keep the quiz concise unless the user explicitly asks for a long quiz.
-- Use free_text only when open-ended input is genuinely needed.
+
 - Use branching destinations only when the next step logically changes based on an answer.
 ```
 

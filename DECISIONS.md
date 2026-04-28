@@ -8,6 +8,12 @@ A short log of the product and technical decisions you made while building Text-
 
 <!-- What shape does a generated quiz take? Why those fields? What did you deliberately leave out? -->
 
+- Versioned JSON spec with a quiz object
+- Supports miltile choice, yes no, slider, free text (images?)
+- Delibreatly left out image based quizes
+- Normalized 0-100 scoring model so result bands always map cleanly
+- Score delta on every option -20 +20 rather than arbitray scoring functions (make sure this is the best way to do things)
+
 ## LLM choice
 
 <!-- Which provider and model did you use? Why? Cost-per-quiz estimate? -->

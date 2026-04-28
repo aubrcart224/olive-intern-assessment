@@ -43,8 +43,7 @@ function aggregateQuestionAnswers(
   sessions: QuizSessionRow[],
 ) {
   switch (question.type) {
-    case "multiple_choice":
-    case "image_choice": {
+    case "multiple_choice": {
       const counts: Record<string, number> = {};
       question.options.forEach((o) => (counts[o.id] = 0));
       sessions.forEach((s) => {
@@ -96,16 +95,6 @@ function aggregateQuestionAnswers(
       });
       return bucketLabels.map((label, i) => ({ label, count: bucketCounts[i] }));
     }
-    case "free_text": {
-      const responses: string[] = [];
-      sessions.forEach((s) => {
-        const ans = s.answers_json[question.id];
-        if (typeof ans === "string" && ans.trim().length > 0) {
-          responses.push(ans.trim());
-        }
-      });
-      return responses;
-    }
   }
 }
 
@@ -130,33 +119,6 @@ function QuestionChart({
     () => aggregateQuestionAnswers(question, sessions),
     [question, sessions],
   );
-
-  if (question.type === "free_text") {
-    const responses = data as string[];
-    return (
-      <div className="space-y-3">
-        {responses.length === 0 ? (
-          <p className="text-sm text-olive-500">No responses yet.</p>
-        ) : (
-          <ul className="space-y-2">
-            {responses.slice(0, 20).map((r, i) => (
-              <li
-                key={i}
-                className="rounded-xl border border-olive-200 bg-olive-50/40 px-4 py-3 text-sm text-charcoal"
-              >
-                {r}
-              </li>
-            ))}
-            {responses.length > 20 && (
-              <li className="text-xs text-olive-500">
-                + {responses.length - 20} more responses
-              </li>
-            )}
-          </ul>
-        )}
-      </div>
-    );
-  }
 
   const chartData = data as { label: string; count: number }[];
   const total = chartData.reduce((sum, d) => sum + d.count, 0);
@@ -379,11 +341,6 @@ export function QuizAnalytics({
                     <span className="inline-flex items-center rounded-full border border-olive-200 bg-white px-2.5 py-0.5 text-xs font-medium capitalize text-olive-700">
                       {currentQuestion.type.replace("_", " ")}
                     </span>
-                    {currentQuestion.type === "free_text" && (
-                      <span className="inline-flex items-center rounded-full bg-olive-100 px-2.5 py-0.5 text-xs font-medium text-olive-700">
-                        Text
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>

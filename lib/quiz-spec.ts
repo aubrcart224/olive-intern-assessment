@@ -4,22 +4,6 @@ const idSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
   message: "Use kebab-case ids with letters, numbers, and hyphens only.",
 });
 
-const imageAssetSchema = z
-  .object({
-    imageUrl: z.string().url().optional(),
-    imagePrompt: z.string().min(1).max(280).optional(),
-    alt: z.string().min(1).max(160),
-  })
-  .superRefine((value, ctx) => {
-    if (!value.imageUrl && !value.imagePrompt) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Provide either imageUrl or imagePrompt.",
-        path: ["imagePrompt"],
-      });
-    }
-  });
-
 const destinationSchema = z
   .object({
     kind: z.enum(["question", "result", "end"]),
@@ -100,7 +84,6 @@ export const choiceOptionSchema = z.object({
   label: z.string().min(1).max(140),
   helperText: z.string().max(240).optional(),
   scoreDelta: z.number().int().min(-20).max(20),
-  image: imageAssetSchema.optional(),
 });
 
 const questionBaseSchema = z.object({
@@ -164,53 +147,10 @@ const sliderQuestionSchema = questionBaseSchema
     }
   });
 
-const freeTextQuestionSchema = questionBaseSchema.extend({
-  type: z.literal("free_text"),
-  placeholder: z.string().max(160).optional(),
-  maxLength: z.number().int().min(20).max(2000),
-  evaluation: z.discriminatedUnion("mode", [
-    z.object({
-      mode: z.literal("manual_review"),
-      rubric: z.string().min(1).max(400),
-      defaultScoreDelta: z.number().int().min(-20).max(20),
-    }),
-    z.object({
-      mode: z.literal("keyword_match"),
-      keywordBuckets: z
-        .array(
-          z.object({
-            keywords: z.array(z.string().min(1).max(40)).min(1).max(8),
-            scoreDelta: z.number().int().min(-20).max(20),
-            feedback: z.string().min(1).max(160).optional(),
-          }),
-        )
-        .min(1)
-        .max(6),
-      fallbackScoreDelta: z.number().int().min(-20).max(20),
-    }),
-  ]),
-});
-
-const imageChoiceQuestionSchema = questionBaseSchema.extend({
-  type: z.literal("image_choice"),
-  promptImage: imageAssetSchema.optional(),
-  allowMultiple: z.boolean(),
-  options: z
-    .array(
-      choiceOptionSchema.extend({
-        image: imageAssetSchema,
-      }),
-    )
-    .min(2)
-    .max(6),
-});
-
 export const quizQuestionSchema = z.discriminatedUnion("type", [
   multipleChoiceQuestionSchema,
   yesNoQuestionSchema,
   sliderQuestionSchema,
-  freeTextQuestionSchema,
-  imageChoiceQuestionSchema,
 ]);
 
 export const resultBandSchema = z
@@ -243,8 +183,6 @@ const quizCoreSchema = z
         "multiple_choice",
         "yes_no",
         "slider",
-        "free_text",
-        "image_choice",
       ]),
     ),
     scoring: z.object({
