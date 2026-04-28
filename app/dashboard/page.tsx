@@ -26,6 +26,29 @@ import { QuizAnalytics } from "@/components/quiz-analytics";
 import { createBrowserClient, type QuizRow, type QuizSessionRow } from "@/lib/supabase";
 
 /* ------------------------------------------------------------------ */
+/*  Olive Leaf Icon                                                    */
+/* ------------------------------------------------------------------ */
+function OliveLeafIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.5 0 1-.05 1.5-.15" />
+      <path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2" />
+      <path d="M12 22V12" />
+      <path d="M12 12c3-2 5-5 5-8" />
+      <path d="M12 12c-3-1-5-4-5-7" />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
@@ -142,10 +165,13 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-background px-6 py-10">
+      <main className="min-h-screen bg-cream px-6 py-10">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-center justify-center py-20">
-            <div className="text-muted-foreground">Loading dashboard...</div>
+            <div className="flex items-center gap-3 text-olive-600">
+              <OliveLeafIcon className="h-5 w-5 animate-pulse" />
+              <span className="text-lg font-medium">Loading dashboard...</span>
+            </div>
           </div>
         </div>
       </main>
@@ -153,27 +179,36 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10">
+    <main className="min-h-screen bg-cream px-6 py-10">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
         {/* Header */}
-        <div className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 rounded-3xl border-2 border-olive-200 bg-white p-8 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">Live data</Badge>
-              <Badge variant="outline">Supabase</Badge>
+              <span className="inline-flex items-center gap-2 rounded-full bg-olive-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-olive-700">
+                <OliveLeafIcon className="h-3 w-3" />
+                Live data
+              </span>
+              <span className="inline-flex items-center rounded-full border border-olive-200 bg-white px-3 py-1 text-xs font-semibold text-olive-600">
+                Supabase
+              </span>
             </div>
             <div className="space-y-2">
-              <h1 className="text-4xl font-semibold tracking-tight">
+              <h1 className="text-4xl font-extrabold tracking-tight text-charcoal">
                 Quiz funnel dashboard
               </h1>
-              <p className="max-w-2xl text-muted-foreground">
+              <p className="max-w-2xl text-olive-600">
                 Select a quiz below to see its performance, responses, and insights.
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/">
-              <Button size="lg" variant="outline">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-xl border-olive-200 text-olive-700 hover:bg-olive-50 hover:text-olive-800"
+              >
                 Back to builder
               </Button>
             </Link>
@@ -181,76 +216,84 @@ export default function DashboardPage() {
         </div>
 
         {/* Quiz Selector */}
-        <Card>
-          <CardContent className="py-6">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={goPrevQuiz}
-                disabled={quizIndex <= 0}
-                className="rounded-xl bg-muted p-2 text-muted-foreground transition hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <ChevronLeft className="size-5" />
-              </button>
+        <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={goPrevQuiz}
+              disabled={quizIndex <= 0}
+              className="rounded-xl bg-olive-50 p-2 text-olive-600 transition hover:bg-olive-100 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeft className="size-5" />
+            </button>
 
-              <div className="flex-1">
-                {quizzes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center">
-                    No quizzes yet. Create one from the builder.
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                        Quiz {quizIndex + 1} of {quizzes.length}
+            <div className="flex-1">
+              {quizzes.length === 0 ? (
+                <p className="text-sm text-olive-500 text-center">
+                  No quizzes yet. Create one from the builder.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs uppercase tracking-wider text-olive-500">
+                      Quiz {quizIndex + 1} of {quizzes.length}
+                    </span>
+                    {selectedQuiz && (
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          selectedQuiz.is_published
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-olive-100 text-olive-700"
+                        }`}
+                      >
+                        {selectedQuiz.is_published ? "Live" : "Draft"}
                       </span>
-                      {selectedQuiz && (
-                        <Badge variant={selectedQuiz.is_published ? "success" : "outline"}>
-                          {selectedQuiz.is_published ? "Live" : "Draft"}
-                        </Badge>
-                      )}
-                    </div>
-                    <select
-                      value={selectedQuizId ?? ""}
-                      onChange={(e) => setSelectedQuizId(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-base font-medium text-foreground outline-none ring-offset-background focus:ring-2 focus:ring-olive-300"
-                    >
-                      {quizzes.map((quiz) => (
-                        <option key={quiz.id} value={quiz.id}>
-                          {quiz.title}
-                        </option>
-                      ))}
-                    </select>
+                    )}
                   </div>
-                )}
-              </div>
-
-              <button
-                onClick={goNextQuiz}
-                disabled={quizIndex >= quizzes.length - 1}
-                className="rounded-xl bg-muted p-2 text-muted-foreground transition hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <ChevronRight className="size-5" />
-              </button>
+                  <select
+                    value={selectedQuizId ?? ""}
+                    onChange={(e) => setSelectedQuizId(e.target.value)}
+                    className="w-full rounded-xl border-2 border-olive-200 bg-white px-4 py-3 text-base font-medium text-charcoal outline-none transition focus:border-olive-400 focus:ring-4 focus:ring-olive-500/10"
+                  >
+                    {quizzes.map((quiz) => (
+                      <option key={quiz.id} value={quiz.id}>
+                        {quiz.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
+
+            <button
+              onClick={goNextQuiz}
+              disabled={quizIndex >= quizzes.length - 1}
+              className="rounded-xl bg-olive-50 p-2 text-olive-600 transition hover:bg-olive-100 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronRight className="size-5" />
+            </button>
+          </div>
+        </div>
 
         {selectedQuiz && quizStats && (
           <>
             {/* Quiz Header & Quick Actions */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold">{selectedQuiz.title}</h2>
-                <p className="text-sm text-muted-foreground">
-                  Created {new Date(selectedQuiz.created_at).toLocaleDateString()} · Share token: {" "}
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                <h2 className="text-2xl font-bold text-charcoal">{selectedQuiz.title}</h2>
+                <p className="text-sm text-olive-600">
+                  Created {new Date(selectedQuiz.created_at).toLocaleDateString()} · Share token:{" "}
+                  <code className="rounded-lg bg-olive-50 px-2 py-0.5 text-xs font-mono text-olive-700">
                     {selectedQuiz.share_token}
                   </code>
                 </p>
               </div>
               <div className="flex gap-3">
                 <Link href={`/quiz?id=${selectedQuiz.id}`} target="_blank">
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl border-olive-200 text-olive-700 hover:bg-olive-50"
+                  >
                     <ExternalLink className="mr-2 size-4" />
                     Open quiz
                   </Button>
@@ -260,115 +303,112 @@ export default function DashboardPage() {
 
             {/* Stats Grid */}
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
+                <div className="flex flex-row items-start justify-between">
                   <div className="space-y-1">
-                    <CardDescription>Starts</CardDescription>
-                    <CardTitle className="text-3xl">{quizStats.starts}</CardTitle>
+                    <p className="text-sm text-olive-500">Starts</p>
+                    <p className="text-3xl font-bold text-charcoal">{quizStats.starts}</p>
                   </div>
-                  <div className="rounded-2xl bg-muted p-3">
-                    <Users className="size-5 text-muted-foreground" />
+                  <div className="rounded-2xl bg-olive-50 p-3">
+                    <Users className="size-5 text-olive-600" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    People who opened this quiz
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="mt-4 text-sm text-olive-500">
+                  People who opened this quiz
+                </p>
+              </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
+                <div className="flex flex-row items-start justify-between">
                   <div className="space-y-1">
-                    <CardDescription>Completions</CardDescription>
-                    <CardTitle className="text-3xl">{quizStats.completions}</CardTitle>
+                    <p className="text-sm text-olive-500">Completions</p>
+                    <p className="text-3xl font-bold text-charcoal">{quizStats.completions}</p>
                   </div>
-                  <div className="rounded-2xl bg-muted p-3">
-                    <CheckCircle2 className="size-5 text-muted-foreground" />
+                  <div className="rounded-2xl bg-olive-50 p-3">
+                    <CheckCircle2 className="size-5 text-olive-600" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Finished this quiz
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="mt-4 text-sm text-olive-500">
+                  Finished this quiz
+                </p>
+              </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
+                <div className="flex flex-row items-start justify-between">
                   <div className="space-y-1">
-                    <CardDescription>Completion rate</CardDescription>
-                    <CardTitle className="text-3xl">{quizStats.rate}%</CardTitle>
+                    <p className="text-sm text-olive-500">Completion rate</p>
+                    <p className="text-3xl font-bold text-charcoal">{quizStats.rate}%</p>
                   </div>
-                  <div className="rounded-2xl bg-muted p-3">
-                    <Activity className="size-5 text-muted-foreground" />
+                  <div className="rounded-2xl bg-olive-50 p-3">
+                    <Activity className="size-5 text-olive-600" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Start to finish conversion
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="mt-4 text-sm text-olive-500">
+                  Start to finish conversion
+                </p>
+              </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
+                <div className="flex flex-row items-start justify-between">
                   <div className="space-y-1">
-                    <CardDescription>Avg score</CardDescription>
-                    <CardTitle className="text-3xl">
+                    <p className="text-sm text-olive-500">Avg score</p>
+                    <p className="text-3xl font-bold text-charcoal">
                       {quizStats.avgScore > 0 ? `${quizStats.avgScore}%` : "—"}
-                    </CardTitle>
+                    </p>
                   </div>
-                  <div className="rounded-2xl bg-muted p-3">
-                    <BarChart3 className="size-5 text-muted-foreground" />
+                  <div className="rounded-2xl bg-olive-50 p-3">
+                    <BarChart3 className="size-5 text-olive-600" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Average across completions
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="mt-4 text-sm text-olive-500">
+                  Average across completions
+                </p>
+              </div>
             </section>
 
             {/* Two column: Results Distribution + Completion Funnel */}
             <section className="grid gap-6 xl:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Results distribution</CardTitle>
-                  <CardDescription>
+              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-charcoal">Results distribution</h3>
+                  <p className="text-sm text-olive-500">
                     How people scored on this quiz
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
+                  </p>
+                </div>
+                <div className="space-y-5">
                   {quizStats.distribution.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-sm text-muted-foreground text-center">
+                    <div className="rounded-2xl border-2 border-dashed border-olive-200 bg-olive-50/30 p-6 text-sm text-olive-500 text-center">
                       No completed responses yet.
                     </div>
                   ) : (
                     quizStats.distribution.map((item) => (
                       <div className="space-y-2" key={item.bandId}>
                         <div className="flex items-center justify-between gap-3 text-sm">
-                          <span className="font-medium">{item.bandId}</span>
-                          <span className="text-muted-foreground">
+                          <span className="font-medium text-charcoal">{item.bandId}</span>
+                          <span className="text-olive-600">
                             {item.count} ({item.percent}%)
                           </span>
                         </div>
-                        <Progress value={item.percent} />
+                        <div className="h-2.5 w-full overflow-hidden rounded-full bg-olive-100">
+                          <div
+                            className="h-full rounded-full bg-olive-500 transition-[width] duration-500 ease-out"
+                            style={{ width: `${item.percent}%` }}
+                          />
+                        </div>
                       </div>
                     ))
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Completion funnel</CardTitle>
-                  <CardDescription>
+              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-charcoal">Completion funnel</h3>
+                  <p className="text-sm text-olive-500">
                     Stage-by-stage for this quiz
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  </p>
+                </div>
+                <div className="space-y-5">
                   {[
                     {
                       label: "Visited quiz",
@@ -383,16 +423,21 @@ export default function DashboardPage() {
                   ].map((step) => (
                     <div className="space-y-2" key={step.label}>
                       <div className="flex items-center justify-between text-sm">
-                        <span>{step.label}</span>
-                        <span className="text-muted-foreground">
+                        <span className="font-medium text-charcoal">{step.label}</span>
+                        <span className="text-olive-600">
                           {step.count} ({step.value}%)
                         </span>
                       </div>
-                      <Progress value={step.value} />
+                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-olive-100">
+                        <div
+                          className="h-full rounded-full bg-olive-500 transition-[width] duration-500 ease-out"
+                          style={{ width: `${step.value}%` }}
+                        />
+                      </div>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </section>
 
             {/* Per-question responses */}
@@ -402,32 +447,32 @@ export default function DashboardPage() {
             />
 
             {/* Recent activity for this quiz */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <CardTitle>Recent activity</CardTitle>
-                    <CardDescription>
-                      Latest completions for this quiz
-                    </CardDescription>
-                  </div>
-                  <Badge variant="outline">{recentCompletions.length} shown</Badge>
+            <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold text-charcoal">Recent activity</h3>
+                  <p className="text-sm text-olive-500">
+                    Latest completions for this quiz
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
+                <span className="inline-flex items-center rounded-full border border-olive-200 bg-white px-3 py-1 text-xs font-semibold text-olive-600">
+                  {recentCompletions.length} shown
+                </span>
+              </div>
+              <div className="space-y-3">
                 {recentCompletions.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-sm text-muted-foreground text-center">
+                  <div className="rounded-2xl border-2 border-dashed border-olive-200 bg-olive-50/30 p-6 text-sm text-olive-500 text-center">
                     No responses yet. Share the quiz link to start collecting data.
                   </div>
                 ) : (
                   <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                     {recentCompletions.map((session) => (
                       <div
-                        className="rounded-2xl border border-border p-4"
+                        className="rounded-2xl border-2 border-olive-200 bg-white p-4 transition hover:border-olive-300 hover:shadow-sm"
                         key={session.id}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-olive-500">
                             {session.final_band_id ?? "No result"}
                           </span>
                           <span className="text-lg font-bold text-olive-700">
@@ -436,7 +481,7 @@ export default function DashboardPage() {
                               : "—"}
                           </span>
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground">
+                        <p className="mt-2 text-xs text-olive-400">
                           {session.completed_at
                             ? new Date(session.completed_at).toLocaleString()
                             : new Date(session.created_at).toLocaleString()}
@@ -445,8 +490,8 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </>
         )}
       </div>

@@ -12,14 +12,6 @@ import {
   YAxis,
 } from "recharts";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { type QuizQuestion, type QuizSpec } from "@/lib/quiz-spec";
 import { type QuizRow, type QuizSessionRow } from "@/lib/supabase";
 
@@ -144,19 +136,19 @@ function QuestionChart({
     return (
       <div className="space-y-3">
         {responses.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No responses yet.</p>
+          <p className="text-sm text-olive-500">No responses yet.</p>
         ) : (
           <ul className="space-y-2">
             {responses.slice(0, 20).map((r, i) => (
               <li
                 key={i}
-                className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-foreground"
+                className="rounded-xl border border-olive-200 bg-olive-50/40 px-4 py-3 text-sm text-charcoal"
               >
                 {r}
               </li>
             ))}
             {responses.length > 20 && (
-              <li className="text-xs text-muted-foreground">
+              <li className="text-xs text-olive-500">
                 + {responses.length - 20} more responses
               </li>
             )}
@@ -172,7 +164,7 @@ function QuestionChart({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">
+        <span className="text-olive-500">
           {total} response{total !== 1 ? "s" : ""}
         </span>
       </div>
@@ -284,135 +276,131 @@ export function QuizAnalytics({
 
   if (quizzes.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Per-question responses</CardTitle>
-          <CardDescription>
+      <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold text-charcoal">Per-question responses</h3>
+          <p className="text-sm text-olive-500">
             Create a quiz to see answer breakdowns.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
       {quizzes.length > 1 && (
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle>Per-question responses</CardTitle>
-                <CardDescription>
-                  Select a quiz to see how people answered each question.
-                </CardDescription>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {quizzes.map((quiz) => (
-                  <button
-                    key={quiz.id}
-                    onClick={() => {
-                      setActiveQuizId(quiz.id);
-                      setCurrentQuestionIndex(0);
-                    }}
-                    className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
-                      selectedQuizId === quiz.id
-                        ? "bg-olive-500 text-white shadow-sm"
-                        : "bg-olive-50 text-olive-700 hover:bg-olive-100"
-                    }`}
-                  >
-                    {quiz.title}
-                  </button>
-                ))}
-              </div>
+        <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-charcoal">Per-question responses</h3>
+              <p className="text-sm text-olive-500">
+                Select a quiz to see how people answered each question.
+              </p>
             </div>
-          </CardHeader>
-        </Card>
+            <div className="flex flex-wrap gap-2">
+              {quizzes.map((quiz) => (
+                <button
+                  key={quiz.id}
+                  onClick={() => {
+                    setActiveQuizId(quiz.id);
+                    setCurrentQuestionIndex(0);
+                  }}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+                    selectedQuizId === quiz.id
+                      ? "bg-olive-500 text-white shadow-sm"
+                      : "bg-olive-50 text-olive-700 hover:bg-olive-100"
+                  }`}
+                >
+                  {quiz.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {spec && questions.length > 0 && (
         <div className="space-y-4">
           {/* Question Navigation */}
-          <Card>
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={goToPrevious}
-                  disabled={currentQuestionIndex === 0}
-                  className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  ← Previous
-                </button>
+          <div className="rounded-3xl border-2 border-olive-200 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={goToPrevious}
+                disabled={currentQuestionIndex === 0}
+                className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                ← Previous
+              </button>
 
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Question {currentQuestionIndex + 1} of {questions.length}
-                  </span>
-                  {/* Question dots */}
-                  <div className="flex gap-1.5">
-                    {questions.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => goToQuestion(idx)}
-                        className={`h-2 rounded-full transition-all ${
-                          idx === currentQuestionIndex
-                            ? "w-6 bg-olive-500"
-                            : "w-2 bg-olive-200 hover:bg-olive-300"
-                        }`}
-                        aria-label={`Go to question ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-sm text-olive-500">
+                  Question {currentQuestionIndex + 1} of {questions.length}
+                </span>
+                {/* Question dots */}
+                <div className="flex gap-1.5">
+                  {questions.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => goToQuestion(idx)}
+                      className={`h-2 rounded-full transition-all ${
+                        idx === currentQuestionIndex
+                          ? "w-6 bg-olive-500"
+                          : "w-2 bg-olive-200 hover:bg-olive-300"
+                      }`}
+                      aria-label={`Go to question ${idx + 1}`}
+                    />
+                  ))}
                 </div>
-
-                <button
-                  onClick={goToNext}
-                  disabled={currentQuestionIndex === questions.length - 1}
-                  className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Next →
-                </button>
               </div>
-            </CardContent>
-          </Card>
+
+              <button
+                onClick={goToNext}
+                disabled={currentQuestionIndex === questions.length - 1}
+                className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
 
           {/* Single Question Display */}
-          <Card className="flex flex-col">
-            <CardHeader>
+          <div className="flex flex-col rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+            <div className="mb-6">
               <div className="flex items-start gap-4">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-olive-100 text-sm font-bold text-olive-700">
                   {currentQuestionIndex + 1}
                 </span>
                 <div className="flex-1">
-                  <CardTitle className="text-lg leading-relaxed">
+                  <h3 className="text-lg font-bold leading-relaxed text-charcoal">
                     {currentQuestion.title}
-                  </CardTitle>
+                  </h3>
                   <div className="mt-2 flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs capitalize">
+                    <span className="inline-flex items-center rounded-full border border-olive-200 bg-white px-2.5 py-0.5 text-xs font-medium capitalize text-olive-700">
                       {currentQuestion.type.replace("_", " ")}
-                    </Badge>
+                    </span>
                     {currentQuestion.type === "free_text" && (
-                      <Badge variant="secondary" className="text-xs">
+                      <span className="inline-flex items-center rounded-full bg-olive-100 px-2.5 py-0.5 text-xs font-medium text-olive-700">
                         Text
-                      </Badge>
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="flex-1">
+            </div>
+            <div className="flex-1">
               <QuestionChart question={currentQuestion} sessions={quizSessions} />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
 
       {!spec && selectedQuiz && (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-muted-foreground">
+        <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm">
+          <div className="py-8 text-center text-sm text-olive-500">
             Could not load quiz spec for analysis.
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
