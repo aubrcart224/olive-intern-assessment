@@ -257,6 +257,91 @@ function ScoreInput({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Number Input Component                                             */
+/* ------------------------------------------------------------------ */
+function NumberInput({
+  value,
+  onChange,
+  min = -999,
+  max = 999,
+  label,
+  width = "w-20",
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  label?: string;
+  width?: string;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(String(value));
+
+  const handleSave = () => {
+    const num = parseInt(editValue, 10);
+    if (!isNaN(num)) {
+      onChange(Math.max(min, Math.min(max, num)));
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(String(value));
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    }
+    if (e.key === "Escape") {
+      handleCancel();
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        {label && <span className="text-xs text-gray-500">{label}</span>}
+        <input
+          type="number"
+          className={`${width} rounded-lg border-2 border-olive-300 bg-white px-2 py-1.5 text-sm text-center font-semibold outline-none transition focus:border-olive-500 focus:ring-4 focus:ring-olive-500/10`}
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          min={min}
+          max={max}
+          autoFocus
+        />
+        <button
+          onClick={handleSave}
+          className="rounded-md bg-olive-500 px-2 py-1 text-xs font-bold text-white hover:bg-olive-600"
+        >
+          ✓
+        </button>
+        <button
+          onClick={handleCancel}
+          className="rounded-md bg-olive-100 px-2 py-1 text-xs font-bold text-olive-700 hover:bg-olive-200"
+        >
+          ✕
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setIsEditing(true)}
+      className="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-bold text-gray-700 transition hover:bg-gray-200"
+    >
+      {label && <span className="text-gray-500 font-normal">{label}</span>}
+      {value}
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main Page Component                                                */
 /* ------------------------------------------------------------------ */
 export default function Home() {
@@ -271,6 +356,7 @@ export default function Home() {
     message: "Describe the quiz you want in plain text. The AI will turn it into an interactive quiz.",
     tone: "idle",
   });
+  const [questionsCollapsed, setQuestionsCollapsed] = useState(false);
 
   const sharePath = useMemo(() => {
     if (savedQuizId) {
@@ -543,6 +629,119 @@ export default function Home() {
     });
   };
 
+  const generateUniqueId = (prefix: string, existingIds: string[]): string => {
+    let counter = 1;
+    let id = `${prefix}-${counter}`;
+    while (existingIds.includes(id)) {
+      counter++;
+      id = `${prefix}-${counter}`;
+    }
+    return id;
+  };
+
+  const addQuestion = (type: "multiple_choice" | "yes_no" | "slider") => {
+    if (!generatedSpec) return;
+    const allIds = generatedSpec.quiz.questions.map((q) => q.id);
+    const newId = generateUniqueId("q", allIds);
+
+    let newQuestion: QuizQuestion;
+    if (type === "multiple_choice") {
+      newQuestion = {
+        id: newId,
+        type: "multiple_choice",
+        title: "New multiple choice question",
+        required: true,
+        allowMultiple: false,
+        options: [
+          { id: `${newId}-opt-1`, label: "Option A", scoreDelta: 0 },
+          { id: `${newId}-opt-2`, label: "Option B", scoreDelta: 0 },
+        ],
+      } as QuizQuestion;
+    } else if (type === "yes_no") {
+      newQuestion = {
+        id: newId,
+        type: "yes_no",
+        title: "New yes/no question",
+        required: true,
+        yesLabel: "Yes",
+        noLabel: "No",
+        scoreDelta: { yes: 5, no: -5 },
+      } as QuizQuestion;
+    } else {
+      newQuestion = {
+        id: newId,
+        type: "slider",
+        title: "New slider question",
+        required: true,
+        min: 0,
+        max: 10,
+        step: 1,
+        minLabel: "Low",
+        maxLabel: "High",
+        scoreBands: [
+          { minValue: 0, maxValue: 10, scoreDelta: 0, label: "Neutral" },
+        ],
+      } as QuizQuestion;
+    }
+
+    setGeneratedSpec({
+      ...generatedSpec,
+      quiz: {
+        ...generatedSpec.quiz,
+        questions: [...generatedSpec.quiz.questions, newQuestion],
+      },
+    });
+  };
+
+  const addOption = (questionIndex: number) => {
+    if (!generatedSpec) return;
+    const question = generatedSpec.quiz.questions[questionIndex];
+    if (!("options" in question)) return;
+    if (question.options.length >= 8) return;
+
+    const allOptionIds = question.options.map((o) => o.id);
+    const newId = generateUniqueId(`${question.id}-opt`, allOptionIds);
+    const newOption: ChoiceOption = {
+      id: newId,
+      label: `Option ${String.fromCharCode(65 + question.options.length)}`,
+      scoreDelta: 0,
+    };
+
+    updateQuestion(questionIndex, {
+      options: [...question.options, newOption],
+    } as Partial<QuizQuestion>);
+  };
+
+  const removeScoreBand = (questionIndex: number, bandIndex: number) => {
+    if (!generatedSpec) return;
+    const question = generatedSpec.quiz.questions[questionIndex];
+    if (question.type !== "slider") return;
+    if (question.scoreBands.length <= 1) return;
+    const newBands = question.scoreBands.filter((_, i) => i !== bandIndex);
+    updateQuestion(questionIndex, { scoreBands: newBands } as Partial<QuizQuestion>);
+  };
+
+  const addScoreBand = (questionIndex: number) => {
+    if (!generatedSpec) return;
+    const question = generatedSpec.quiz.questions[questionIndex];
+    if (question.type !== "slider") return;
+    if (question.scoreBands.length >= 8) return;
+    const lastBand = question.scoreBands[question.scoreBands.length - 1];
+    const newBand = {
+      minValue: lastBand ? lastBand.maxValue + 1 : question.min,
+      maxValue: lastBand ? lastBand.maxValue + 2 : question.max,
+      scoreDelta: 0,
+      label: "New band",
+    };
+    updateQuestion(questionIndex, {
+      scoreBands: [...question.scoreBands, newBand],
+    } as Partial<QuizQuestion>);
+  };
+
+  const toggleQuestionsCollapsed = () => {
+    setQuestionsCollapsed((prev) => !prev);
+  };
+
   /* ------------------------------------------------------------------ */
   /*  Render                                                             */
   /* ------------------------------------------------------------------ */
@@ -562,7 +761,7 @@ export default function Home() {
           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-olive-700 transition hover:bg-olive-50"
         >
           <OliveLeafIcon className="h-5 w-5" />
-          <span className="hidden sm:inline">Text-to-Quiz</span>
+          <span className="hidden sm:inline">Olive Text-to-Quiz</span>
         </Link>
         <Link href="/dashboard">
           <Button 
@@ -581,7 +780,7 @@ export default function Home() {
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-olive-100 px-4 py-2">
               <OliveLeafIcon className="h-4 w-4 text-olive-600" />
               <span className="text-xs font-semibold uppercase tracking-wider text-olive-700">
-                Olive Interview
+                Olive Text-to-Quiz
               </span>
             </div>
             <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
@@ -817,9 +1016,29 @@ export default function Home() {
 
               {/* Questions */}
               <div className="space-y-4">
-                <h3 className="text-lg font-bold tracking-tight text-gray-900">
-                  Questions
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold tracking-tight text-gray-900">
+                    Questions
+                  </h3>
+                  <button
+                    onClick={toggleQuestionsCollapsed}
+                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-olive-600 transition hover:bg-olive-50"
+                    title={questionsCollapsed ? "Expand all" : "Collapse all"}
+                  >
+                    <svg
+                      className={`h-4 w-4 transition-transform ${questionsCollapsed ? "rotate-180" : ""}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    {questionsCollapsed ? "Expand" : "Collapse"}
+                  </button>
+                </div>
+
+                {!questionsCollapsed && (
+                <>
                 {generatedSpec.quiz.questions.map((question, index) => (
                   <div
                     key={question.id}
@@ -834,10 +1053,14 @@ export default function Home() {
                           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-600">
                             {question.type.replace("_", " ")}
                           </span>
-                          {"allowMultiple" in question && question.allowMultiple && (
-                            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                              Multi-select
-                            </span>
+                          {"allowMultiple" in question && (
+                            <button
+                              onClick={() => updateQuestion(index, { allowMultiple: !question.allowMultiple } as Partial<QuizQuestion>)}
+                              className={`rounded-full px-3 py-1 text-xs font-medium transition ${question.allowMultiple ? "bg-amber-50 text-amber-700 hover:bg-amber-100" : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}
+                              title={question.allowMultiple ? "Click to make single-select" : "Click to make multi-select"}
+                            >
+                              {question.allowMultiple ? "Multi-select" : "Single-select"}
+                            </button>
                           )}
                           {"options" in question && (
                             <span className="text-xs text-gray-400">
@@ -985,39 +1208,235 @@ export default function Home() {
                               </div>
                             ))}
                           </div>
+                          {"options" in question && question.options.length < 8 && (
+                            <button
+                              onClick={() => addOption(index)}
+                              className="mt-3 inline-flex items-center gap-2 rounded-xl border-2 border-dashed border-olive-200 px-4 py-3 text-sm font-medium text-olive-600 transition hover:border-olive-400 hover:bg-olive-50 w-full justify-center"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              Add option
+                            </button>
+                          )}
                         </div>
                       )}
 
                       {/* Yes/No Section */}
                       {question.type === "yes_no" && (
-                        <div className="mt-6 grid grid-cols-2 gap-4 border-t-2 border-olive-200 pt-6">
-                          <div>
-                            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
-                              "Yes" Label
-                            </label>
-                            <EditableField
-                              value={question.yesLabel}
-                              onChange={(yesLabel) => updateQuestion(index, { yesLabel })}
-                              placeholder="Yes"
-                              maxLength={40}
-                            />
+                        <div className="mt-6 space-y-4 border-t-2 border-olive-200 pt-6">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                                "Yes" Label
+                              </label>
+                              <EditableField
+                                value={question.yesLabel}
+                                onChange={(yesLabel) => updateQuestion(index, { yesLabel })}
+                                placeholder="Yes"
+                                maxLength={40}
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
+                                "No" Label
+                              </label>
+                              <EditableField
+                                value={question.noLabel}
+                                onChange={(noLabel) => updateQuestion(index, { noLabel })}
+                                placeholder="No"
+                                maxLength={40}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 pt-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-semibold uppercase tracking-wider text-olive-500">Yes score</span>
+                              <ScoreInput
+                                value={question.scoreDelta.yes}
+                                onChange={(yes) => updateQuestion(index, { scoreDelta: { ...question.scoreDelta, yes } } as Partial<QuizQuestion>)}
+                              />
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-semibold uppercase tracking-wider text-olive-500">No score</span>
+                              <ScoreInput
+                                value={question.scoreDelta.no}
+                                onChange={(no) => updateQuestion(index, { scoreDelta: { ...question.scoreDelta, no } } as Partial<QuizQuestion>)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Slider Section */}
+                      {question.type === "slider" && (
+                        <div className="mt-6 space-y-6 border-t-2 border-olive-200 pt-6">
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">Min Value</label>
+                              <NumberInput
+                                value={question.min}
+                                onChange={(min) => updateQuestion(index, { min } as Partial<QuizQuestion>)}
+                                max={question.max - 1}
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">Max Value</label>
+                              <NumberInput
+                                value={question.max}
+                                onChange={(max) => updateQuestion(index, { max } as Partial<QuizQuestion>)}
+                                min={question.min + 1}
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">Step</label>
+                              <NumberInput
+                                value={question.step}
+                                onChange={(step) => updateQuestion(index, { step: Math.max(1, step) } as Partial<QuizQuestion>)}
+                                min={1}
+                                max={question.max - question.min}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">Min Label</label>
+                              <EditableField
+                                value={question.minLabel}
+                                onChange={(minLabel) => updateQuestion(index, { minLabel })}
+                                placeholder="Low"
+                                maxLength={40}
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">Max Label</label>
+                              <EditableField
+                                value={question.maxLabel}
+                                onChange={(maxLabel) => updateQuestion(index, { maxLabel })}
+                                placeholder="High"
+                                maxLength={40}
+                              />
+                            </div>
                           </div>
                           <div>
-                            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-olive-500">
-                              "No" Label
-                            </label>
-                            <EditableField
-                              value={question.noLabel}
-                              onChange={(noLabel) => updateQuestion(index, { noLabel })}
-                              placeholder="No"
-                              maxLength={40}
-                            />
+                            <div className="mb-3 flex items-center justify-between">
+                              <label className="text-xs font-semibold uppercase tracking-wider text-olive-500">Score Bands</label>
+                            </div>
+                            <div className="space-y-3">
+                              {question.scoreBands.map((band, bandIndex) => (
+                                <div
+                                  key={bandIndex}
+                                  className="group flex items-center gap-3 rounded-2xl border border-olive-200 bg-olive-50/30 p-4"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <NumberInput
+                                      value={band.minValue}
+                                      onChange={(minValue) => {
+                                        const newBands = [...question.scoreBands];
+                                        newBands[bandIndex] = { ...band, minValue };
+                                        updateQuestion(index, { scoreBands: newBands } as Partial<QuizQuestion>);
+                                      }}
+                                      max={band.maxValue}
+                                      label="From"
+                                      width="w-16"
+                                    />
+                                    <span className="text-xs text-gray-400">-</span>
+                                    <NumberInput
+                                      value={band.maxValue}
+                                      onChange={(maxValue) => {
+                                        const newBands = [...question.scoreBands];
+                                        newBands[bandIndex] = { ...band, maxValue };
+                                        updateQuestion(index, { scoreBands: newBands } as Partial<QuizQuestion>);
+                                      }}
+                                      min={band.minValue}
+                                      label="To"
+                                      width="w-16"
+                                    />
+                                  </div>
+                                  <div className="flex-1">
+                                    <EditableField
+                                      value={band.label || ""}
+                                      onChange={(label) => {
+                                        const newBands = [...question.scoreBands];
+                                        newBands[bandIndex] = { ...band, label: label || undefined };
+                                        updateQuestion(index, { scoreBands: newBands } as Partial<QuizQuestion>);
+                                      }}
+                                      placeholder="Band label..."
+                                      maxLength={80}
+                                      className="text-sm font-medium text-gray-900"
+                                    />
+                                  </div>
+                                  <ScoreInput
+                                    value={band.scoreDelta}
+                                    onChange={(scoreDelta) => {
+                                      const newBands = [...question.scoreBands];
+                                      newBands[bandIndex] = { ...band, scoreDelta };
+                                      updateQuestion(index, { scoreBands: newBands } as Partial<QuizQuestion>);
+                                    }}
+                                  />
+                                  <button
+                                    onClick={() => removeScoreBand(index, bandIndex)}
+                                    disabled={question.scoreBands.length <= 1}
+                                    className="rounded-lg p-2 text-gray-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-0"
+                                    title="Remove band"
+                                  >
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                            {question.scoreBands.length < 8 && (
+                              <button
+                                onClick={() => addScoreBand(index)}
+                                className="mt-3 inline-flex items-center gap-2 rounded-xl border-2 border-dashed border-olive-200 px-4 py-3 text-sm font-medium text-olive-600 transition hover:border-olive-400 hover:bg-olive-50 w-full justify-center"
+                              >
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add score band
+                              </button>
+                            )}
                           </div>
                         </div>
                       )}
                     </div>
                   </div>
                 ))}
+                </>
+                )}
+                {generatedSpec.quiz.questions.length < 12 && (
+                  <div className="flex flex-wrap items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-olive-200 bg-olive-50/30 p-6">
+                    <button
+                      onClick={() => addQuestion("multiple_choice")}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-olive-700 shadow-sm border border-olive-200 transition hover:bg-olive-50 hover:border-olive-300"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Multiple Choice
+                    </button>
+                    <button
+                      onClick={() => addQuestion("yes_no")}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-olive-700 shadow-sm border border-olive-200 transition hover:bg-olive-50 hover:border-olive-300"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Yes / No
+                    </button>
+                    <button
+                      onClick={() => addQuestion("slider")}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-olive-700 shadow-sm border border-olive-200 transition hover:bg-olive-50 hover:border-olive-300"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                      </svg>
+                      Slider
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Results */}
