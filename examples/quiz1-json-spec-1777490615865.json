@@ -1,0 +1,173 @@
+{
+  "version": "1.0",
+  "quiz": {
+    "title": "Ultra-Processed Food Check",
+    "description": "Discover how much ultra-processed food is in your diet and get personalized recommendations.",
+    "promptIntent": "Help users assess their ultra-processed food consumption through questions about breakfast habits, label reading, home cooking, and fast food frequency, then recommend Olive based on their score.",
+    "questionTypesUsed": [
+      "multiple_choice",
+      "yes_no",
+      "slider"
+    ],
+    "scoring": {
+      "model": "normalized_100",
+      "scoreLabel": "Whole Food Score"
+    },
+    "questions": [
+      {
+        "id": "breakfast-habits",
+        "title": "What does your typical breakfast look like?",
+        "description": "Think about what you eat most mornings.",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "whole-foods",
+            "label": "Eggs, oatmeal, fruit, or homemade smoothies",
+            "scoreDelta": 20
+          },
+          {
+            "id": "packaged-cereal",
+            "label": "Packaged cereal, granola bars, or yogurt cups",
+            "scoreDelta": 8
+          },
+          {
+            "id": "fast-food-breakfast",
+            "label": "Fast food breakfast sandwich or pastries",
+            "scoreDelta": 0
+          },
+          {
+            "id": "skip-breakfast",
+            "label": "I usually skip breakfast",
+            "scoreDelta": 12
+          }
+        ]
+      },
+      {
+        "id": "ingredient-labels",
+        "title": "Do you regularly read ingredient labels when shopping?",
+        "description": "This helps you identify ultra-processed foods with long ingredient lists.",
+        "required": true,
+        "type": "yes_no",
+        "yesLabel": "Yes, I check labels",
+        "noLabel": "No, I don't usually check",
+        "scoreDelta": {
+          "yes": 20,
+          "no": 0
+        }
+      },
+      {
+        "id": "home-cooking-frequency",
+        "title": "How many meals per week do you cook at home from scratch?",
+        "description": "Count meals where you use whole ingredients, not pre-made or frozen meals.",
+        "required": true,
+        "type": "slider",
+        "min": 0,
+        "max": 21,
+        "step": 1,
+        "minLabel": "0 meals",
+        "maxLabel": "21 meals",
+        "scoreBands": [
+          {
+            "minValue": 0,
+            "maxValue": 5,
+            "scoreDelta": 0,
+            "label": "Rarely cooking"
+          },
+          {
+            "minValue": 6,
+            "maxValue": 10,
+            "scoreDelta": 8,
+            "label": "Occasional cooking"
+          },
+          {
+            "minValue": 11,
+            "maxValue": 15,
+            "scoreDelta": 16,
+            "label": "Regular cooking"
+          },
+          {
+            "minValue": 16,
+            "maxValue": 21,
+            "scoreDelta": 20,
+            "label": "Frequent cooking"
+          }
+        ]
+      },
+      {
+        "id": "fast-food-frequency",
+        "title": "How often do you eat fast food or takeout?",
+        "description": "Include restaurant meals, delivery, and drive-through.",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "rarely",
+            "label": "Rarely or never",
+            "scoreDelta": 20
+          },
+          {
+            "id": "once-week",
+            "label": "Once a week",
+            "scoreDelta": 12
+          },
+          {
+            "id": "few-times-week",
+            "label": "2-3 times per week",
+            "scoreDelta": 4
+          },
+          {
+            "id": "daily",
+            "label": "4 or more times per week",
+            "scoreDelta": 0
+          }
+        ]
+      }
+    ],
+    "resultsScreen": {
+      "title": "Your Ultra-Processed Food Assessment",
+      "showScore": true,
+      "scoreLabel": "Whole Food Score",
+      "bands": [
+        {
+          "id": "high-processed",
+          "title": "High Ultra-Processed Food Intake",
+          "description": "Your diet includes a significant amount of ultra-processed foods. Making small changes like cooking more meals at home and reading ingredient labels can have a big impact on your health. Olive can help you transition to whole foods with personalized meal plans and guidance.",
+          "minPercent": 0,
+          "maxPercent": 25,
+          "ctaLabel": "Try Olive",
+          "ctaHref": "https://olive.com/signup"
+        },
+        {
+          "id": "moderate-processed",
+          "title": "Moderate Ultra-Processed Food Intake",
+          "description": "You're making some good choices, but there's room for improvement. Reducing packaged foods and increasing home cooking could help you feel better and have more energy. Olive offers tools to make this transition easier.",
+          "minPercent": 26,
+          "maxPercent": 50,
+          "ctaLabel": "Explore Olive",
+          "ctaHref": "https://olive.com/learn-more"
+        },
+        {
+          "id": "low-processed",
+          "title": "Low Ultra-Processed Food Intake",
+          "description": "Great work! You're already prioritizing whole foods in your diet. You might benefit from fine-tuning your approach or discovering new recipes. Olive can help you maintain these healthy habits and explore new options.",
+          "minPercent": 51,
+          "maxPercent": 75,
+          "ctaLabel": "See What Olive Offers",
+          "ctaHref": "https://olive.com"
+        },
+        {
+          "id": "minimal-processed",
+          "title": "Minimal Ultra-Processed Food Intake",
+          "description": "Excellent! You're eating mostly whole foods and have strong healthy eating habits. Keep up the great work. Olive can support you with recipe inspiration and help you stay on track.",
+          "minPercent": 76,
+          "maxPercent": 100,
+          "ctaLabel": "Join Olive Community",
+          "ctaHref": "https://olive.com/community"
+        }
+      ]
+    }
+  }
+}

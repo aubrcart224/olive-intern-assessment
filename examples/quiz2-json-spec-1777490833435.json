@@ -1,0 +1,168 @@
+{
+  "version": "1.0",
+  "quiz": {
+    "title": "Welcome to Olive",
+    "description": "Help us personalize your experience in just a few quick questions.",
+    "promptIntent": "Onboarding quiz for new Olive users to understand health goals, shopping habits, and cooking frequency for personalization",
+    "questionTypesUsed": [
+      "multiple_choice"
+    ],
+    "scoring": {
+      "model": "normalized_100",
+      "scoreLabel": "Personalization Score"
+    },
+    "questions": [
+      {
+        "id": "health-goals",
+        "title": "What are your main health goals?",
+        "description": "Select all that apply",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": true,
+        "options": [
+          {
+            "id": "weight-loss",
+            "label": "Weight loss",
+            "scoreDelta": 10
+          },
+          {
+            "id": "cleaner-eating",
+            "label": "Cleaner eating",
+            "scoreDelta": 10
+          },
+          {
+            "id": "allergy-tracking",
+            "label": "Allergy tracking",
+            "scoreDelta": 10
+          },
+          {
+            "id": "feeding-kids-better",
+            "label": "Feeding kids better",
+            "scoreDelta": 10
+          }
+        ]
+      },
+      {
+        "id": "grocery-stores",
+        "title": "Where do you usually shop for groceries?",
+        "description": "Select all that apply",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": true,
+        "options": [
+          {
+            "id": "whole-foods",
+            "label": "Whole Foods",
+            "scoreDelta": 5
+          },
+          {
+            "id": "trader-joes",
+            "label": "Trader Joe's",
+            "scoreDelta": 5
+          },
+          {
+            "id": "kroger",
+            "label": "Kroger",
+            "scoreDelta": 5
+          },
+          {
+            "id": "walmart",
+            "label": "Walmart",
+            "scoreDelta": 5
+          },
+          {
+            "id": "target",
+            "label": "Target",
+            "scoreDelta": 5
+          },
+          {
+            "id": "costco",
+            "label": "Costco",
+            "scoreDelta": 5
+          },
+          {
+            "id": "local-market",
+            "label": "Local market or co-op",
+            "scoreDelta": 5
+          },
+          {
+            "id": "other-store",
+            "label": "Other",
+            "scoreDelta": 5
+          }
+        ]
+      },
+      {
+        "id": "cooking-frequency",
+        "title": "How often do you cook at home?",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "daily",
+            "label": "Daily",
+            "scoreDelta": 20
+          },
+          {
+            "id": "few-times-week",
+            "label": "A few times a week",
+            "scoreDelta": 15
+          },
+          {
+            "id": "once-week",
+            "label": "About once a week",
+            "scoreDelta": 10
+          },
+          {
+            "id": "rarely",
+            "label": "Rarely",
+            "scoreDelta": 5
+          }
+        ]
+      }
+    ],
+    "resultsScreen": {
+      "title": "Your Olive Experience is Ready",
+      "showScore": false,
+      "bands": [
+        {
+          "id": "highly-engaged",
+          "title": "Welcome to Your Personalized Journey",
+          "description": "Based on your goals and habits, we've customized Olive to help you succeed. Let's get started with recipes and meal plans tailored just for you.",
+          "minPercent": 76,
+          "maxPercent": 100,
+          "ctaLabel": "Start Exploring",
+          "ctaHref": "https://olive.app/dashboard"
+        },
+        {
+          "id": "moderately-engaged",
+          "title": "Your Custom Experience Awaits",
+          "description": "We've set up Olive based on your preferences. Explore personalized recommendations and discover how we can support your health journey.",
+          "minPercent": 51,
+          "maxPercent": 75,
+          "ctaLabel": "View Recommendations",
+          "ctaHref": "https://olive.app/dashboard"
+        },
+        {
+          "id": "getting-started",
+          "title": "Let's Begin Together",
+          "description": "Your Olive profile is ready. We'll help you achieve your goals one step at a time with tools designed for your lifestyle.",
+          "minPercent": 26,
+          "maxPercent": 50,
+          "ctaLabel": "Get Started",
+          "ctaHref": "https://olive.app/dashboard"
+        },
+        {
+          "id": "new-user",
+          "title": "Welcome to Olive",
+          "description": "Thanks for sharing your preferences. We're here to support you on your health journey, no matter where you're starting from.",
+          "minPercent": 0,
+          "maxPercent": 25,
+          "ctaLabel": "Explore Olive",
+          "ctaHref": "https://olive.app/dashboard"
+        }
+      ]
+    }
+  }
+}

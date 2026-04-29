@@ -1,0 +1,205 @@
+{
+  "version": "1.0",
+  "quiz": {
+    "title": "What Kind of Eater Are You?",
+    "description": "Take this fun 5-question quiz to discover your eating personality type!",
+    "promptIntent": "A lighthearted personality quiz that categorizes users into fun eating archetypes based on their food habits and attitudes.",
+    "questionTypesUsed": [
+      "multiple_choice"
+    ],
+    "scoring": {
+      "model": "normalized_100",
+      "scoreLabel": "Eating Awareness Score"
+    },
+    "questions": [
+      {
+        "id": "grocery-shopping-approach",
+        "title": "How do you approach grocery shopping?",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "list-warrior",
+            "label": "I have a detailed list organized by aisle",
+            "scoreDelta": 20
+          },
+          {
+            "id": "vibe-shopper",
+            "label": "I wander and grab what looks good",
+            "scoreDelta": 5
+          },
+          {
+            "id": "label-reader",
+            "label": "I spend 20 minutes reading every nutrition label",
+            "scoreDelta": 20
+          },
+          {
+            "id": "speed-demon",
+            "label": "In and out in 10 minutes, same items every time",
+            "scoreDelta": 15
+          }
+        ]
+      },
+      {
+        "id": "expiration-date-philosophy",
+        "title": "What's your relationship with expiration dates?",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "strict-follower",
+            "label": "If it's past the date, it goes straight in the trash",
+            "scoreDelta": 18
+          },
+          {
+            "id": "sniff-test",
+            "label": "Smell test is the only test that matters",
+            "scoreDelta": 10
+          },
+          {
+            "id": "what-date",
+            "label": "Wait, food has expiration dates?",
+            "scoreDelta": 0
+          },
+          {
+            "id": "date-scholar",
+            "label": "I know the difference between 'best by' and 'use by'",
+            "scoreDelta": 20
+          }
+        ]
+      },
+      {
+        "id": "new-restaurant-strategy",
+        "title": "When trying a new restaurant, you:",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "research-master",
+            "label": "Read every review and study the menu online first",
+            "scoreDelta": 20
+          },
+          {
+            "id": "ask-server",
+            "label": "Ask the server 47 questions about ingredients",
+            "scoreDelta": 20
+          },
+          {
+            "id": "point-and-pray",
+            "label": "Point at a random menu item and hope for the best",
+            "scoreDelta": 5
+          },
+          {
+            "id": "safe-choice",
+            "label": "Order the same thing you always order everywhere",
+            "scoreDelta": 10
+          }
+        ]
+      },
+      {
+        "id": "cooking-at-home",
+        "title": "Your cooking style at home is best described as:",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "recipe-follower",
+            "label": "I follow recipes to the exact measurement",
+            "scoreDelta": 18
+          },
+          {
+            "id": "creative-chef",
+            "label": "Recipes are suggestions; I improvise wildly",
+            "scoreDelta": 15
+          },
+          {
+            "id": "microwave-artist",
+            "label": "Does reheating count as cooking?",
+            "scoreDelta": 0
+          },
+          {
+            "id": "meal-prep-pro",
+            "label": "I meal prep on Sundays with color-coded containers",
+            "scoreDelta": 20
+          }
+        ]
+      },
+      {
+        "id": "food-photo-habits",
+        "title": "How often do you photograph your food?",
+        "required": true,
+        "type": "multiple_choice",
+        "allowMultiple": false,
+        "options": [
+          {
+            "id": "every-meal",
+            "label": "Every meal is a photo shoot",
+            "scoreDelta": 15
+          },
+          {
+            "id": "special-occasions",
+            "label": "Only when it's Instagram-worthy",
+            "scoreDelta": 10
+          },
+          {
+            "id": "never-photo",
+            "label": "Never, I'm too busy eating",
+            "scoreDelta": 5
+          },
+          {
+            "id": "food-journal",
+            "label": "I keep a detailed food journal with photos",
+            "scoreDelta": 20
+          }
+        ]
+      }
+    ],
+    "resultsScreen": {
+      "title": "Your Eating Personality Type",
+      "showScore": true,
+      "scoreLabel": "Awareness Level",
+      "bands": [
+        {
+          "id": "blissfully-unaware",
+          "title": "The Blissfully Unaware",
+          "description": "You live in the moment and eat with pure instinct! Food is fuel, fun, or whatever's in front of you. Labels? Dates? Never heard of them. You're the friend who eats the mystery leftovers and lives to tell the tale.",
+          "minPercent": 0,
+          "maxPercent": 25,
+          "ctaLabel": "Share Your Result",
+          "ctaHref": "https://example.com/share"
+        },
+        {
+          "id": "casual-grazer",
+          "title": "The Casual Grazer",
+          "description": "You're chill about food but not completely oblivious. You have some awareness of what you're eating, but you're not losing sleep over it. Life's too short to read every ingredient list, right?",
+          "minPercent": 26,
+          "maxPercent": 50,
+          "ctaLabel": "Share Your Result",
+          "ctaHref": "https://example.com/share"
+        },
+        {
+          "id": "mindful-muncher",
+          "title": "The Mindful Muncher",
+          "description": "You strike a nice balance between awareness and enjoyment. You care about what you eat and make informed choices, but you're not obsessive about it. You can read a nutrition label AND enjoy a spontaneous treat.",
+          "minPercent": 51,
+          "maxPercent": 75,
+          "ctaLabel": "Share Your Result",
+          "ctaHref": "https://example.com/share"
+        },
+        {
+          "id": "label-detective",
+          "title": "The Label Detective",
+          "description": "You know EXACTLY what's going into your body at all times. You've memorized ingredient lists, you understand food science, and you have opinions about preservatives. Your friends come to you for nutrition advice, and your pantry is impeccably organized.",
+          "minPercent": 76,
+          "maxPercent": 100,
+          "ctaLabel": "Share Your Result",
+          "ctaHref": "https://example.com/share"
+        }
+      ]
+    }
+  }
+}

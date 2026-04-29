@@ -482,6 +482,24 @@ export default function Home() {
     }
   };
 
+  const handleExportSpec = () => {
+    if (!generatedSpec) return;
+    const dataStr = JSON.stringify(generatedSpec, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `quiz-spec-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setGenerationState({
+      message: "Quiz spec exported as JSON!",
+      tone: "success",
+    });
+  };
+
   /* Update functions */
   const updateQuizTitle = (title: string) => {
     if (!generatedSpec) return;
@@ -887,6 +905,16 @@ export default function Home() {
                   </a>
                 </div>
                 <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleExportSpec}
+                    variant="outline"
+                    className="rounded-xl border-olive-200 text-olive-700 hover:bg-olive-50"
+                  >
+                    <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export JSON
+                  </Button>
                   <Button
                     onClick={handleCopyShareLink}
                     variant="outline"
