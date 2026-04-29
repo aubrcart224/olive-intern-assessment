@@ -30,20 +30,7 @@ Why?
 - Was given a anthropic api key
 - Strong structured output adherence, good at following long system prompts with JSON schemas, decent price/performance for this task
 
-Cost Esitmate:
-
-- Max tokens 4000 for full quiz generation, 2000 for option regeneration.
-
-- Full quiz generation (~4000 tokens total):
-  ≈ $0.03–$0.04 per quiz
-
-- Option regeneration (~2000 tokens total):
-  ≈ $0.015–$0.02 per regeneration
-
-Assumptions:
-
-- Claude Sonnet 4.5 pricing (~$3 / 1M input tokens, ~$15 / 1M output tokens)
-- Roughly equal split between input and output tokens
+Cost Esitmate: >> Given later in Decisions.md
 
 ## Question type vocabulary
 

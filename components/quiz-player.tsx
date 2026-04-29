@@ -264,7 +264,7 @@ function AnswerCard({
       onClick={onClick}
       type="button"
       className={cn(
-        "group relative flex w-full items-start gap-4 rounded-2xl border-2 px-5 py-5 text-left transition-all duration-200 ease-out",
+        "group relative flex w-full items-center gap-4 rounded-2xl border-2 px-5 py-5 text-left transition-all duration-200 ease-out",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-olive-400 focus-visible:ring-offset-2",
         isSelected
           ? "border-olive-500 bg-olive-500 text-white shadow-md shadow-olive-500/20"
@@ -273,7 +273,7 @@ function AnswerCard({
     >
       <span
         className={cn(
-          "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors",
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors",
           isSelected
             ? "bg-white/20 text-white"
             : "bg-olive-100 text-olive-700 group-hover:bg-olive-200",
@@ -761,14 +761,7 @@ export function QuizPlayer({ spec, quizId }: QuizPlayerProps) {
               Back
             </button>
 
-            {!showResults && (
-              <div className="hidden items-center gap-2 text-xs font-medium text-olive-300 sm:flex">
-                <span className="rounded-md bg-olive-50 px-1.5 py-0.5">
-                  Enter
-                </span>
-                <span>to continue</span>
-              </div>
-            )}
+
 
             {showResults ? (
               <Button
