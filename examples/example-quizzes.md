@@ -12,7 +12,7 @@ This document contains 3 example quizzes generated from the prompts specified in
 
 **Generated Spec:** (See `quiz-1-upf-assessment.json`)
 
-**Live URL:** `http://localhost:3000/quiz?id=004673bc-d42f-4a62-a649-0e5a8c1337dd`
+**Live URL:** `https://olive-intern-assessment-beta.vercel.app/quiz?id=004673bc-d42f-4a62-a649-0e5a8c1337dd`
 
 **Dashboard Screenshot:** (See screenshots folder)
 
@@ -26,7 +26,7 @@ This document contains 3 example quizzes generated from the prompts specified in
 
 **Generated Spec:** (See `quiz-2-onboarding.json`)
 
-**Live URL:** `http://localhost:3000/quiz?id=7602116e-7794-4c72-8dec-b6394f310d94`
+**Live URL:** `https://olive-intern-assessment-beta.vercel.app/quiz?id=7602116e-7794-4c72-8dec-b6394f310d94`
 
 **Dashboard Screenshot:** (See screenshots folder)
 
@@ -40,6 +40,6 @@ This document contains 3 example quizzes generated from the prompts specified in
 
 **Generated Spec:** (See `quiz-3-personality.json`)
 
-**Live URL:** `http://localhost:3000/quiz?id=f9600eba-dcc1-4e1f-b91a-06f285e88a06`
+**Live URL:** `https://olive-intern-assessment-beta.vercel.app/quiz?id=f9600eba-dcc1-4e1f-b91a-06f285e88a06`
 
 **Dashboard Screenshot:** (See screenshots folder)
