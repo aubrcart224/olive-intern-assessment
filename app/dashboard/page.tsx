@@ -261,12 +261,12 @@ export default function DashboardPage() {
             <button
               onClick={goPrevQuiz}
               disabled={quizIndex <= 0}
-              className="rounded-xl bg-olive-50 p-2 text-olive-600 transition hover:bg-olive-100 disabled:cursor-not-allowed disabled:opacity-40"
+              className="shrink-0 self-center rounded-xl bg-olive-50 p-2 text-olive-600 transition hover:bg-olive-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronLeft className="size-5" />
             </button>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {quizzes.length === 0 ? (
                 <p className="text-sm text-olive-500 text-center">
                   No quizzes yet. Create one from the builder.
@@ -307,7 +307,7 @@ export default function DashboardPage() {
             <button
               onClick={goNextQuiz}
               disabled={quizIndex >= quizzes.length - 1}
-              className="rounded-xl bg-olive-50 p-2 text-olive-600 transition hover:bg-olive-100 disabled:cursor-not-allowed disabled:opacity-40"
+              className="shrink-0 self-center rounded-xl bg-olive-50 p-2 text-olive-600 transition hover:bg-olive-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronRight className="size-5" />
             </button>
@@ -353,8 +353,8 @@ export default function DashboardPage() {
 
             {/* Stats Grid */}
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
-                <div className="flex flex-row items-start justify-between">
+              <div className="flex flex-col rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300 h-full">
+                <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-sm text-olive-500">Starts</p>
                     <p className="text-3xl font-bold text-charcoal">{quizStats.starts}</p>
@@ -363,13 +363,13 @@ export default function DashboardPage() {
                     <Users className="size-5 text-olive-600" />
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-olive-500">
+                <p className="mt-auto pt-4 text-sm text-olive-500">
                   People who opened this quiz
                 </p>
               </div>
 
-              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
-                <div className="flex flex-row items-start justify-between">
+              <div className="flex flex-col rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300 h-full">
+                <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-sm text-olive-500">Completions</p>
                     <p className="text-3xl font-bold text-charcoal">{quizStats.completions}</p>
@@ -378,13 +378,13 @@ export default function DashboardPage() {
                     <CheckCircle2 className="size-5 text-olive-600" />
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-olive-500">
+                <p className="mt-auto pt-4 text-sm text-olive-500">
                   Finished this quiz
                 </p>
               </div>
 
-              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
-                <div className="flex flex-row items-start justify-between">
+              <div className="flex flex-col rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300 h-full">
+                <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-sm text-olive-500">Completion rate</p>
                     <p className="text-3xl font-bold text-charcoal">{quizStats.rate}%</p>
@@ -393,13 +393,13 @@ export default function DashboardPage() {
                     <Activity className="size-5 text-olive-600" />
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-olive-500">
+                <p className="mt-auto pt-4 text-sm text-olive-500">
                   Start to finish conversion
                 </p>
               </div>
 
-              <div className="rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300">
-                <div className="flex flex-row items-start justify-between">
+              <div className="flex flex-col rounded-3xl border-2 border-olive-200 bg-white p-6 shadow-sm transition hover:border-olive-300 h-full">
+                <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-sm text-olive-500">Avg score</p>
                     <p className="text-3xl font-bold text-charcoal">
@@ -410,7 +410,7 @@ export default function DashboardPage() {
                     <BarChart3 className="size-5 text-olive-600" />
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-olive-500">
+                <p className="mt-auto pt-4 text-sm text-olive-500">
                   Average across completions
                 </p>
               </div>

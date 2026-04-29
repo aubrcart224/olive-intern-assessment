@@ -286,14 +286,16 @@ export function QuizAnalytics({
         <div className="space-y-4">
           {/* Question Navigation */}
           <div className="rounded-3xl border-2 border-olive-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={goToPrevious}
-                disabled={currentQuestionIndex === 0}
-                className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                ← Previous
-              </button>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <div className="flex justify-start">
+                <button
+                  onClick={goToPrevious}
+                  disabled={currentQuestionIndex === 0}
+                  className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  ← Previous
+                </button>
+              </div>
 
               <div className="flex flex-col items-center gap-2">
                 <span className="text-sm text-olive-500">
@@ -316,13 +318,15 @@ export function QuizAnalytics({
                 </div>
               </div>
 
-              <button
-                onClick={goToNext}
-                disabled={currentQuestionIndex === questions.length - 1}
-                className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Next →
-              </button>
+              <div className="flex justify-end">
+                <button
+                  onClick={goToNext}
+                  disabled={currentQuestionIndex === questions.length - 1}
+                  className="rounded-lg bg-olive-100 px-4 py-2 text-sm font-medium text-olive-700 transition hover:bg-olive-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next →
+                </button>
+              </div>
             </div>
           </div>
 
