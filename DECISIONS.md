@@ -92,3 +92,5 @@ Cost Esitmate: >> Given later in Decisions.md
 ## What I'd do differently with more time
 
 <!-- Honest list. -->
+
+If I had more time I would make the dashbaord UI cleanrer as well as the ui in general. I would also begin working on supporting more quiz types depending on what the users wanted to generate. I would also work on fully deploying the webapp, as right now everything just runs locally.

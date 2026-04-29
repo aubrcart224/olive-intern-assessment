@@ -14,7 +14,7 @@ This document contains 3 example quizzes generated from the prompts specified in
 
 **Live URL:** `http://localhost:3000/quiz?id=004673bc-d42f-4a62-a649-0e5a8c1337dd`
 
-**Dashboard Screenshot:** (Add screenshot showing starts, completions, result distribution)
+**Dashboard Screenshot:** (See screenshots folder)
 
 ---
 
@@ -28,7 +28,7 @@ This document contains 3 example quizzes generated from the prompts specified in
 
 **Live URL:** `http://localhost:3000/quiz?id=7602116e-7794-4c72-8dec-b6394f310d94`
 
-**Dashboard Screenshot:** (Add screenshot showing starts, completions, result distribution)
+**Dashboard Screenshot:** (See screenshots folder)
 
 ---
 
@@ -42,17 +42,4 @@ This document contains 3 example quizzes generated from the prompts specified in
 
 **Live URL:** `http://localhost:3000/quiz?id=f9600eba-dcc1-4e1f-b91a-06f285e88a06`
 
-**Dashboard Screenshot:** (Add screenshot showing starts, completions, result distribution)
-
----
-
-## How to Generate These
-
-1. Start the dev server: `pnpm dev`
-2. Visit `http://localhost:3000`
-3. Paste each prompt into the text area
-4. Click "Generate Quiz"
-5. Click "Save changes" to persist to database
-6. Copy the shareable link
-7. Open the link and complete the quiz to generate response data
-8. Visit `/dashboard` to see analytics and take screenshots
+**Dashboard Screenshot:** (See screenshots folder)
